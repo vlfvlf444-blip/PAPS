@@ -608,8 +608,9 @@
 
   <div class="card" style="padding:12px 14px;margin-bottom:12px;background:#e8f4ff;border-color:#90caf9">
     <div style="font-size:11px;color:#1565c0;line-height:1.7;font-weight:500">
-      📌 전체등급 = 측정된 종목 등급의 평균 (1등급 가장 높음 · 5등급 가장 낮음)<br>
-      ⚠️ BMI는 등급 아닌 판정이므로 평균에서 제외됩니다.
+      📌 종목별 등급 → 점수 환산: 1등급=25점 · 2등급=20점 · 3등급=15점 · 4등급=10점 · 5등급=5점<br>
+      📊 전체점수(100점 만점) → 1등급(80~100) · 2등급(60~79) · 3등급(40~59) · 4등급(20~39) · 5등급(0~19)<br>
+      ⚠️ 측정 종목 수에 따라 100점 기준으로 비례 환산 · BMI는 제외
     </div>
   </div>
 
@@ -915,39 +916,65 @@ function gradeFilterChange() {
   renderGradeSummary();
 }
 
+// 종목 등급 → 점수 변환 (종목당 최대 25점, 4종목 합계 100점)
+function gradeToScore(grade) {
+  const map = {1: 25, 2: 20, 3: 15, 4: 10, 5: 5};
+  return map[grade] || 0;
+}
+
+// 총점 → 전체등급
+function scoreToGrade(score) {
+  if (score >= 80) return 1;
+  if (score >= 60) return 2;
+  if (score >= 40) return 3;
+  if (score >= 20) return 4;
+  return 5;
+}
+
 function calcOverallGrade(stu, g) {
-  const grades = [];
+  const details = []; // {name, grade, score}
+
   // 왕복오래달리기
   if (stu.data.run) {
     const gr = calcGrade(TB_RUN, stu.gender, g, parseInt(stu.data.run));
-    if (gr) grades.push(gr);
+    if (gr) details.push({ name:'왕복달리기', grade: gr, score: gradeToScore(gr) });
   }
   // 악력
   const dg = stu.data.grip || {};
   const rB = Math.max(parseFloat(dg.r1)||0, parseFloat(dg.r2)||0);
   const lB = Math.max(parseFloat(dg.l1)||0, parseFloat(dg.l2)||0);
   if (rB && lB) {
-    const avg = (rB + lB) / 2;
-    const gr = calcGrade(TB_GRIP, stu.gender, g, avg);
-    if (gr) grades.push(gr);
+    const gr = calcGrade(TB_GRIP, stu.gender, g, (rB + lB) / 2);
+    if (gr) details.push({ name:'악력', grade: gr, score: gradeToScore(gr) });
   }
   // 제자리멀리뛰기
   const dj = stu.data.jump || {};
   const jb = Math.max(parseFloat(dj.t1)||0, parseFloat(dj.t2)||0);
   if (jb) {
     const gr = calcGrade(TB_JUMP, stu.gender, g, jb);
-    if (gr) grades.push(gr);
+    if (gr) details.push({ name:'멀리뛰기', grade: gr, score: gradeToScore(gr) });
   }
   // 유연성
   const df = stu.data.flex || {};
   if (df.t1 !== undefined && df.t1 !== '') {
     const fb = Math.max(parseFloat(df.t1)||-999, parseFloat(df.t2)||-999);
     const gr = calcGrade(TB_FLEX, stu.gender, g, fb);
-    if (gr) grades.push(gr);
+    if (gr) details.push({ name:'유연성', grade: gr, score: gradeToScore(gr) });
   }
-  if (!grades.length) return '';
-  const avg = grades.reduce((a, b) => a + b, 0) / grades.length;
-  return Math.round(avg);
+
+  if (!details.length) return null;
+
+  // 측정 종목 수에 따라 총점 비례 환산 (4종목 기준 100점)
+  const rawTotal = details.reduce((s, d) => s + d.score, 0);
+  const totalScore = Math.round(rawTotal / details.length * 4); // 항상 100점 만점 기준
+  const overallGrade = scoreToGrade(totalScore);
+
+  return {
+    details,
+    totalScore,
+    overallGrade,
+    count: details.length
+  };
 }
 
 function renderGradeSummary() {
@@ -978,21 +1005,25 @@ function renderGradeSummary() {
       const flexG = fb!=='' ? calcGrade(TB_FLEX, stu.gender, g, fb) : '';
 
       const overall = calcOverallGrade(stu, g);
-      if (overall) dist[overall] = (dist[overall]||0) + 1;
+      if (overall) dist[overall.overallGrade] = (dist[overall.overallGrade]||0) + 1;
 
-      const gc = gradeClass(overall);
       const gcColors = {1:'#e65100',2:'#2e7d32',3:'#1565c0',4:'#6a1b9a',5:'#c62828'};
-      const overallBg = overall ? `background:${gcColors[overall]}15;color:${gcColors[overall]};font-weight:800;font-size:14px` : '';
+      const overallHtml = overall
+        ? `<span style="display:inline-block;border-radius:8px;padding:4px 10px;background:${gcColors[overall.overallGrade]}15;color:${gcColors[overall.overallGrade]};font-weight:800;font-size:13px;line-height:1.5;text-align:center">
+            ${overall.overallGrade}등급<br>
+            <span style="font-size:11px;font-weight:600;opacity:0.85">${overall.totalScore}점</span>
+           </span>`
+        : '—';
 
       tbody.innerHTML += `<tr>
         <td><b>${g}-${c}-${stu.num}</b></td>
         <td>${stu.name||'—'}</td>
         <td>${stu.gender||'—'}</td>
-        <td><span class="grade-badge ${gradeClass(runG)}" style="font-size:11px;padding:3px 8px">${gradeShort(runG)}</span></td>
+        <td><span class="grade-badge ${gradeClass(runG)}"  style="font-size:11px;padding:3px 8px">${gradeShort(runG)}</span></td>
         <td><span class="grade-badge ${gradeClass(gripG)}" style="font-size:11px;padding:3px 8px">${gradeShort(gripG)}</span></td>
         <td><span class="grade-badge ${gradeClass(jumpG)}" style="font-size:11px;padding:3px 8px">${gradeShort(jumpG)}</span></td>
         <td><span class="grade-badge ${gradeClass(flexG)}" style="font-size:11px;padding:3px 8px">${gradeShort(flexG)}</span></td>
-        <td style="text-align:center"><span style="display:inline-block;border-radius:8px;padding:5px 10px;${overallBg}">${overall ? overall+'등급' : '—'}</span></td>
+        <td style="text-align:center">${overallHtml}</td>
       </tr>`;
     });
   });
