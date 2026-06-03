@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PAPS 2026">
+<meta name="theme-color" content="#0f4c81">
+<title>2026. 학생건강체력평가</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2942;
+    --blue: #1464a5;
+    --sky: #2196f3;
+    --accent: #00c6ff;
+    --gold: #ffc107;
+    --green: #00c853;
+    --red: #f44336;
+    --orange: #ff9800;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #1a2332;
+    --muted: #6b7a8d;
+    --border: #d1dde8;
+    --shadow: 0 2px 12px rgba(15,41,66,0.10);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+  /* ─── TOP HEADER ─── */
+  .app-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    color: white;
+    padding: 14px 16px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 16px rgba(15,41,66,0.30);
+  }
+  .app-header .logo { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; }
+  .app-header .title { font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
+  .app-header .subtitle { font-size: 10px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+  .header-left { display: flex; flex-direction: column; gap: 2px; }
+  .header-right { display: flex; gap: 8px; }
+  .hdr-btn {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    color: white; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .hdr-btn:hover { background: rgba(255,255,255,0.25); }
+  .hdr-btn.active { background: var(--accent); color: var(--navy); border-color: var(--accent); }
+
+  /* ─── PAGES ─── */
+  .page { display: none; padding: 16px; max-width: 600px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 18px;
+    box-shadow: var(--shadow); margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--bg);
+    display: flex; align-items: center; gap: 6px; letter-spacing: 0.3px;
+  }
+
+  /* ─── FORM ELEMENTS ─── */
+  label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; }
+  select, input[type="number"], input[type="text"], input[type="password"], textarea {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 15px; font-family: inherit; background: var(--bg); color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  select:focus, input:focus, textarea:focus {
+    border-color: var(--sky); box-shadow: 0 0 0 3px rgba(33,150,243,0.12);
+    background: white;
+  }
+  textarea { resize: vertical; min-height: 80px; font-size: 13px; line-height: 1.6; }
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .input-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .form-group { margin-bottom: 12px; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: block; width: 100%; padding: 13px; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.18s;
+    font-family: inherit; letter-spacing: 0.3px;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--blue), var(--sky)); color: white; box-shadow: 0 4px 12px rgba(20,100,165,0.35); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-success { background: linear-gradient(135deg, #00a844, var(--green)); color: white; box-shadow: 0 4px 12px rgba(0,200,83,0.30); }
+  .btn-danger { background: linear-gradient(135deg, #d32f2f, var(--red)); color: white; }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-sm { padding: 7px 14px; font-size: 12px; font-weight: 600; border-radius: 7px; display: inline-block; width: auto; }
+  .btn-gold { background: linear-gradient(135deg, #e65100, var(--gold)); color: white; box-shadow: 0 4px 12px rgba(255,193,7,0.30); }
+
+  /* ─── PIN PAD ─── */
+  #pin-overlay {
+    position: fixed; inset: 0; background: linear-gradient(160deg, var(--navy) 0%, #0a1f36 100%);
+    z-index: 1000; display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 24px;
+  }
+  .pin-card {
+    background: rgba(255,255,255,0.07); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
+    padding: 28px 24px; width: 88%; max-width: 320px;
+  }
+  .pin-title { color: white; font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 6px; }
+  .pin-sub { color: rgba(255,255,255,0.5); font-size: 12px; text-align: center; margin-bottom: 20px; }
+  .pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.35); transition: all 0.2s; }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(0,198,255,0.5); }
+  .pin-dot.error { background: var(--red); border-color: var(--red); }
+  .pin-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pin-btn {
+    background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.15);
+    color: white; border-radius: 12px; padding: 16px; font-size: 20px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+  }
+  .pin-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.95); }
+  .pin-btn.cancel { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+  /* ─── HOME / SETUP ─── */
+  .hero-banner {
+    background: linear-gradient(135deg, var(--blue) 0%, #0d3d6e 100%);
+    color: white; border-radius: 16px; padding: 22px 20px;
+    margin-bottom: 16px; position: relative; overflow: hidden;
+  }
+  .hero-banner::before {
+    content: ''; position: absolute; right: -20px; top: -20px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .hero-banner::after {
+    content: ''; position: absolute; right: 20px; bottom: -30px;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(0,198,255,0.10);
+  }
+  .hero-year { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--accent); margin-bottom: 4px; }
+  .hero-title { font-size: 20px; font-weight: 900; line-height: 1.2; margin-bottom: 8px; }
+  .hero-desc { font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.5; }
+
+  /* ─── CLASS SELECTOR ─── */
+  .class-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .class-chip {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 9px; padding: 10px 4px; text-align: center;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.18s;
+    color: var(--muted);
+  }
+  .class-chip.selected { background: var(--blue); color: white; border-color: var(--blue); box-shadow: 0 3px 8px rgba(20,100,165,0.3); }
+  .class-chip:hover:not(.selected) { border-color: var(--sky); color: var(--sky); }
+
+  /* ─── EVENT TOGGLES ─── */
+  .event-list { display: flex; flex-direction: column; gap: 8px; }
+  .event-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.2s;
+  }
+  .event-toggle.on { background: #e8f4ff; border-color: var(--sky); }
+  .event-toggle-left { display: flex; align-items: center; gap: 10px; }
+  .event-icon { font-size: 18px; }
+  .event-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .event-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .toggle-switch {
+    width: 42px; height: 24px; background: var(--border); border-radius: 12px;
+    position: relative; transition: background 0.2s; flex-shrink: 0;
+  }
+  .toggle-switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px; border-radius: 50%; background: white;
+    transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .event-toggle.on .toggle-switch { background: var(--sky); }
+  .event-toggle.on .toggle-switch::after { transform: translateX(18px); }
+
+  /* ─── STUDENT LIST ─── */
+  .student-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border-radius: var(--radius); padding: 12px 16px;
+    margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border);
+    position: sticky; top: 96px; z-index: 50;
+  }
+  .student-nav .info { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .student-nav .progress-text { font-size: 11px; color: var(--muted); }
+  .nav-arrows { display: flex; gap: 6px; }
+  .nav-arrow {
+    background: var(--bg); border: 1.5px solid var(--border); color: var(--text);
+    border-radius: 7px; padding: 6px 12px; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .nav-arrow:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .student-header {
+    background: linear-gradient(135deg, var(--navy), var(--blue));
+    color: white; border-radius: var(--radius); padding: 16px;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+  }
+  .student-num { font-size: 28px; font-weight: 900; font-family: 'IBM Plex Mono', monospace; color: var(--accent); }
+  .student-info { flex: 1; }
+  .student-name-input { background: transparent; border: none; border-bottom: 2px solid rgba(255,255,255,0.3); color: white; font-size: 20px; font-weight: 700; padding: 2px 0; width: 100%; font-family: inherit; outline: none; }
+  .student-name-input::placeholder { color: rgba(255,255,255,0.4); }
+  .gender-row { display: flex; gap: 8px; margin-top: 10px; }
+  .gender-btn {
+    flex: 1; padding: 9px; border: 1.5px solid rgba(255,255,255,0.2); border-radius: 8px;
+    color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 600; cursor: pointer;
+    background: rgba(255,255,255,0.05); transition: all 0.18s; font-family: inherit;
+  }
+  .gender-btn.selected { background: rgba(255,255,255,0.2); border-color: white; color: white; }
+  .gender-btn.m.selected { background: rgba(33,150,243,0.4); border-color: #64b5f6; }
+  .gender-btn.f.selected { background: rgba(244,67,133,0.4); border-color: #f48fb1; }
+
+  /* ─── EVENT MEASUREMENT ─── */
+  .event-section {
+    background: var(--card); border-radius: var(--radius); padding: 16px;
+    margin-bottom: 12px; border: 1px solid var(--border); box-shadow: var(--shadow);
+  }
+  .event-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--bg);
+  }
+  .event-header .icon { font-size: 20px; }
+  .event-header .name { font-size: 15px; font-weight: 800; color: var(--navy); }
+  .event-header .desc { font-size: 11px; color: var(--muted); }
+  .grade-badge {
+    margin-left: auto; background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 5px 12px; font-size: 13px; font-weight: 700;
+    color: var(--muted); transition: all 0.3s; min-width: 50px; text-align: center;
+  }
+  .grade-badge.g1 { background: #fff3e0; border-color: #ff9800; color: #e65100; }
+  .grade-badge.g2 { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+  .grade-badge.g3 { background: #e3f2fd; border-color: #2196f3; color: #1565c0; }
+  .grade-badge.g4 { background: #f3e5f5; border-color: #9c27b0; color: #6a1b9a; }
+  .grade-badge.g5 { background: #ffebee; border-color: #f44336; color: #c62828; }
+
+  .auto-result {
+    background: var(--bg); border-radius: 8px; padding: 10px 12px;
+    margin-top: 8px; font-size: 12px; color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .auto-result strong { color: var(--navy); font-size: 14px; }
+
+  /* ─── GRIP STRENGTH ─── */
+  .grip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grip-cell { background: var(--bg); border-radius: 8px; padding: 10px; border: 1px solid var(--border); }
+  .grip-cell label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+
+  /* ─── BMI ─── */
+  .bmi-bar { height: 8px; border-radius: 4px; background: linear-gradient(to right, #2196f3, #4caf50, #ff9800, #f44336); margin: 10px 0; position: relative; overflow: visible; }
+  .bmi-marker { position: absolute; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--navy); border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); transform: translateX(-50%); transition: left 0.4s; }
+
+  /* ─── PROGRESS BAR ─── */
+  .prog-wrap { background: var(--bg); border-radius: 6px; height: 8px; overflow: hidden; margin-top: 4px; }
+  .prog-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--blue), var(--accent)); transition: width 0.4s; }
+
+  /* ─── DASHBOARD ─── */
+  .dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    background: var(--card); border-radius: var(--radius); padding: 14px 12px;
+    text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+  .stat-num { font-size: 26px; font-weight: 900; font-family: 'IBM Plex Mono', monospace; color: var(--navy); }
+  .stat-label { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; margin-top: 2px; }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th {
+    background: var(--navy); color: white; padding: 10px 8px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.5px; position: sticky; top: 0;
+  }
+  .data-table td { padding: 9px 8px; border-bottom: 1px solid var(--bg); }
+  .data-table tr:nth-child(even) td { background: #f8fafb; }
+  .data-table tr:hover td { background: #e8f4ff; }
+
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .status-done { background: var(--green); }
+  .status-partial { background: var(--orange); }
+  .status-absent { background: var(--red); }
+  .status-none { background: var(--border); }
+
+  /* ─── ABSENT / SKIP ─── */
+  .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .q-btn {
+    padding: 11px; border: 1.5px solid var(--border); border-radius: 9px;
+    font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.18s;
+    background: var(--card); color: var(--muted); text-align: center; font-family: inherit;
+  }
+  .q-btn.absent { border-color: #f44336; color: #f44336; background: #fff5f5; }
+  .q-btn.skip { border-color: #ff9800; color: #e65100; background: #fff8f0; }
+
+  /* ─── ROSTER INPUT ─── */
+  .roster-hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; background: #f8fafc; border-radius: 6px; padding: 8px 10px; border: 1px solid var(--border); }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 500; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 16px; padding: 22px; width: 100%; max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-title { font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 14px; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+  /* ─── COMPLETE SCREEN ─── */
+  .complete-screen {
+    text-align: center; padding: 30px 20px;
+  }
+  .complete-icon { font-size: 56px; margin-bottom: 12px; }
+  .complete-title { font-size: 22px; font-weight: 900; color: var(--navy); margin-bottom: 6px; }
+  .complete-sub { font-size: 14px; color: var(--muted); }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .result-item { background: var(--bg); border-radius: 10px; padding: 12px; text-align: left; border: 1px solid var(--border); }
+  .result-label { font-size: 10px; color: var(--muted); font-weight: 600; }
+  .result-value { font-size: 16px; font-weight: 700; color: var(--navy); margin-top: 3px; }
+  .result-grade { font-size: 11px; font-weight: 700; margin-top: 2px; }
+
+  /* ─── NAV BOTTOM ─── */
+  .top-nav {
+    background: white; border-bottom: 1px solid var(--border);
+    display: flex; z-index: 90; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    max-width: 600px; margin: 0 auto;
+    position: sticky; top: 50px;
+  }
+  .tnav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8px 2px 6px; cursor: pointer; transition: all 0.18s; border: none; background: none;
+    font-family: inherit; color: var(--muted); font-size: 10px; font-weight: 600; gap: 2px;
+    border-bottom: 3px solid transparent;
+  }
+  .tnav-item .icon { font-size: 18px; }
+  .tnav-item.active { color: var(--blue); border-bottom-color: var(--blue); background: #f0f7ff; }
+
+  body { padding-bottom: 20px; }
+
+  /* ─── STATUS BANNER ─── */
+  .status-banner { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .status-banner.info { background: #e3f2fd; border-color: #90caf9; color: #1565c0; }
+  .status-banner.success { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
+  .status-banner.warn { background: #fff8e1; border-color: #ffcc02; color: #e65100; }
+
+  /* Number pad shortcut row */
+  .num-shortcuts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .num-sc { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; color: var(--blue); font-weight: 600; }
+  .num-sc:active { background: var(--blue); color: white; }
+
+  .pin-change-row { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ─── CSV Export ─── */
+  .csv-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 600; align-items: center; justify-content: center; padding: 20px; }
+  .csv-modal.open { display: flex; }
+  .csv-content { background: white; border-radius: 16px; padding: 20px; width: 100%; max-width: 420px; }
+  .csv-pre { background: #f0f4f8; border-radius: 8px; padding: 12px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; overflow-x: auto; white-space: pre; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); }
+
+  .pill { display: inline-block; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+  .pill-green { background: #e8f5e9; color: #2e7d32; }
+  .pill-orange { background: #fff3e0; color: #e65100; }
+  .pill-red { background: #ffebee; color: #c62828; }
+  .pill-gray { background: var(--bg); color: var(--muted); }
+
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0e1a27; --card: #162030; --text: #e8f0f8; --muted: #7b93aa; --border: #263850; --shadow: 0 2px 12px rgba(0,0,0,0.4); }
+    .data-table tr:nth-child(even) td { background: #1a2a3a; }
+    .data-table tr:hover td { background: #1e3148; }
+    .hero-year, .pin-sub { color: var(--accent); }
+  }
+
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ PIN OVERLAY ═══════════════ -->
+<div id="pin-overlay">
+  <div class="pin-card fade-in">
+    <div class="pin-title">🔐 관리자 인증</div>
+    <div class="pin-sub" id="pin-sub-text">PIN을 입력하세요</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+      <div class="pin-dot" id="pd4"></div>
+      <div class="pin-dot" id="pd5"></div>
+    </div>
+    <div class="pin-numpad">
+      <button class="pin-btn" onclick="pinInput(1)">1</button>
+      <button class="pin-btn" onclick="pinInput(2)">2</button>
+      <button class="pin-btn" onclick="pinInput(3)">3</button>
+      <button class="pin-btn" onclick="pinInput(4)">4</button>
+      <button class="pin-btn" onclick="pinInput(5)">5</button>
+      <button class="pin-btn" onclick="pinInput(6)">6</button>
+      <button class="pin-btn" onclick="pinInput(7)">7</button>
+      <button class="pin-btn" onclick="pinInput(8)">8</button>
+      <button class="pin-btn" onclick="pinInput(9)">9</button>
+      <button class="pin-btn cancel" onclick="closePinOverlay()">취소</button>
+      <button class="pin-btn" onclick="pinInput(0)">0</button>
+      <button class="pin-btn" onclick="pinBack()">⌫</button>
+    </div>
+    <button onclick="pinConfirm()" style="margin-top:14px;width:100%;padding:14px;border:none;border-radius:12px;background:var(--accent);color:var(--navy);font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">확인 ✓</button>
+  </div>
+</div>
+
+<!-- ═══════════════ APP HEADER ═══════════════ -->
+<header class="app-header" style="padding:10px 16px">
+  <div class="header-left">
+    <div class="logo">2026 PAPS · 중학교</div>
+    <div class="title">학생건강체력평가</div>
+  </div>
+  <div class="header-right">
+    <button class="hdr-btn" onclick="openAdminPin()" id="admin-btn">🛡️ 관리자</button>
+  </div>
+</header>
+
+<!-- ═══════════════ TOP NAV ═══════════════ -->
+<nav class="top-nav">
+  <button class="tnav-item active" id="bnav-home"    onclick="goPage('home')"   ><span class="icon">🏠</span>홈</button>
+  <button class="tnav-item"        id="bnav-measure" onclick="goPage('measure')"><span class="icon">📏</span>측정</button>
+  <button class="tnav-item"        id="bnav-dash"    onclick="goPage('dash')"   ><span class="icon">📊</span>현황판</button>
+  <button class="tnav-item"        id="bnav-grade"   onclick="goPage('grade')"  ><span class="icon">🏅</span>전체등급</button>
+</nav>
+<div class="page active fade-in" id="page-home">
+  <div class="hero-banner">
+    <div class="hero-year">2026 SCHOOL FITNESS ASSESSMENT</div>
+    <div class="hero-title">학생건강체력평가<br>측정 시스템</div>
+    <div class="hero-desc">반별 학생 체력 종목을 순서대로 입력하고<br>자동으로 등급을 산출합니다.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏫 반 선택</div>
+    <div class="form-group">
+      <label>학년</label>
+      <select id="sel-grade" onchange="buildClassGrid()">
+        <option value="">학년 선택</option>
+        <option value="1">1학년</option>
+        <option value="2">2학년</option>
+        <option value="3">3학년</option>
+      </select>
+    </div>
+    <div id="class-grid" class="class-grid" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏃 측정 종목 선택</div>
+    <div class="event-list" id="event-list"></div>
+  </div>
+
+  <button class="btn btn-primary" onclick="startMeasure()">이 반 측정 시작 →</button>
+</div>
+
+<!-- ═══════════════ MEASURE PAGE ═══════════════ -->
+<div class="page" id="page-measure">
+  <div class="student-nav" id="student-nav">
+    <div>
+      <div class="info" id="nav-classinfo">1학년 1반</div>
+      <div class="progress-text" id="nav-progress">0 / 0명 완료</div>
+    </div>
+    <div class="nav-arrows">
+      <button class="nav-arrow" onclick="prevStudent()" id="btn-prev">◀ 이전</button>
+      <button class="nav-arrow" onclick="nextStudent()" id="btn-next">다음 ▶</button>
+    </div>
+  </div>
+
+  <div class="prog-wrap" style="margin-bottom:14px">
+    <div class="prog-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+
+  <div class="quick-actions">
+    <button class="q-btn absent" onclick="markAbsent()">🚫 결석 처리</button>
+    <button class="q-btn skip" onclick="markSkip()">↩ 건너뜀</button>
+  </div>
+
+  <div class="student-header">
+    <div class="student-num" id="stu-num">1</div>
+    <div class="student-info">
+      <input class="student-name-input" id="stu-name" placeholder="이름 입력" oninput="saveStudentName(this.value)">
+      <div class="gender-row">
+        <button class="gender-btn m" onclick="setGender('남')">♂ 남</button>
+        <button class="gender-btn f" onclick="setGender('여')">♀ 여</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="events-container"></div>
+
+  <div class="card">
+    <div class="card-title">📝 메모</div>
+    <textarea id="memo-input" placeholder="특이사항 입력..." oninput="saveMemo(this.value)" style="margin-bottom:0"></textarea>
+  </div>
+
+  <button class="btn btn-success" onclick="saveAndNext()" style="margin-top:4px">저장 후 다음 →</button>
+</div>
+
+<!-- ═══════════════ DASHBOARD PAGE ═══════════════ -->
+<div class="page" id="page-dash">
+
+  <!-- 반 필터 + 관리자 버튼 (누구나 접근 가능) -->
+  <div class="card" style="padding:12px 14px;margin-bottom:12px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="dash-filter-grade" onchange="dashFilterChange()" style="flex:1;min-width:76px;padding:9px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);font-family:inherit">
+        <option value="">전체 학년</option>
+        <option value="1">1학년</option>
+        <option value="2">2학년</option>
+        <option value="3">3학년</option>
+      </select>
+      <select id="dash-filter-class" onchange="renderDashboard()" style="flex:1;min-width:76px;padding:9px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);font-family:inherit">
+        <option value="">전체 반</option>
+      </select>
+      <button id="dash-admin-toggle-btn" class="btn btn-sm" onclick="isAdmin ? adminLogout() : openAdminPin()"
+        style="padding:9px 14px;font-size:12px;font-weight:700;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;white-space:nowrap">
+        🛡️ 관리자
+      </button>
+    </div>
+  </div>
+
+  <!-- 통계 -->
+  <div class="dash-stats">
+    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">전체</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-done" style="color:var(--green)">0</div><div class="stat-label">완료</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-absent" style="color:var(--red)">0</div><div class="stat-label">미완/결석</div></div>
+  </div>
+
+  <!-- 관리자 전용 액션 바 -->
+  <div id="admin-action-bar" style="display:none;margin-bottom:14px">
+    <div class="card" style="padding:12px 16px;border-color:#a5d6a7;background:#f1f8f2">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span style="font-size:12px;font-weight:700;color:#2e7d32">✅ 관리자 모드 활성화</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-primary" onclick="exportExcel()">📥 엑셀 다운로드</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmReset()">🗑 초기화</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기록 테이블 -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table class="data-table" id="dash-table">
+        <thead>
+          <tr>
+            <th>학반번</th><th>이름</th><th>성</th>
+            <th>왕복달리기</th><th>악력(kg)</th><th>멀리뛰기</th>
+            <th>유연성</th><th>키</th><th>몸무게</th><th>BMI</th><th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="dash-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PIN 변경 (관리자만) -->
+  <div id="pin-change-card" style="display:none;margin-top:14px">
+    <div class="card">
+      <div class="card-title">🔑 관리자 PIN 변경</div>
+      <div class="pin-change-row">
+        <div class="form-group"><label>현재 PIN</label><input type="password" id="cur-pin" placeholder="현재 PIN 입력"></div>
+        <div class="form-group"><label>새 PIN (4~8자리 숫자)</label><input type="password" id="new-pin" placeholder="새 PIN"></div>
+        <div class="form-group"><label>새 PIN 확인</label><input type="password" id="new-pin2" placeholder="새 PIN 재입력"></div>
+        <button class="btn btn-primary" onclick="changePin()">PIN 변경 저장</button>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="adminLogout()" style="margin-top:8px">관리자 로그아웃</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════ COMPLETE PAGE ═══════════════ -->
+<div class="page" id="page-complete">
+  <div class="card fade-in">
+    <div class="complete-screen">
+      <div class="complete-icon">✅</div>
+      <div class="complete-title">측정 완료!</div>
+      <div class="complete-sub" id="complete-name-label">기록을 확인하세요</div>
+    </div>
+    <div class="result-grid" id="result-grid"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="showDash()">📊 현황판</button>
+      <button class="btn btn-primary" style="flex:1" onclick="goMeasure()">계속 측정</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ GRADE SUMMARY PAGE ═══════════════ -->
+<div class="page" id="page-grade">
+  <div class="card" style="padding:12px 14px;margin-bottom:12px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="grade-filter-g" onchange="gradeFilterChange()" style="flex:1;min-width:76px;padding:9px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);font-family:inherit">
+        <option value="">전체 학년</option>
+        <option value="1">1학년</option>
+        <option value="2">2학년</option>
+        <option value="3">3학년</option>
+      </select>
+      <select id="grade-filter-c" onchange="renderGradeSummary()" style="flex:1;min-width:76px;padding:9px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);font-family:inherit">
+        <option value="">전체 반</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card" style="padding:12px 14px;margin-bottom:12px;background:#e8f4ff;border-color:#90caf9">
+    <div style="font-size:11px;color:#1565c0;line-height:1.7;font-weight:500">
+      📌 전체등급 = 측정된 종목 등급의 평균 (1등급 가장 높음 · 5등급 가장 낮음)<br>
+      ⚠️ BMI는 등급 아닌 판정이므로 평균에서 제외됩니다.
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
+    <div class="stat-card"><div class="stat-num" id="gd1" style="color:#e65100;font-size:22px">0</div><div class="stat-label">1등급</div></div>
+    <div class="stat-card"><div class="stat-num" id="gd2" style="color:#2e7d32;font-size:22px">0</div><div class="stat-label">2등급</div></div>
+    <div class="stat-card"><div class="stat-num" id="gd3" style="color:#1565c0;font-size:22px">0</div><div class="stat-label">3등급</div></div>
+    <div class="stat-card"><div class="stat-num" id="gd4" style="color:#6a1b9a;font-size:22px">0</div><div class="stat-label">4등급</div></div>
+    <div class="stat-card"><div class="stat-num" id="gd5" style="color:#c62828;font-size:22px">0</div><div class="stat-label">5등급</div></div>
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>학반번</th><th>이름</th><th>성</th>
+            <th>왕복달리기</th><th>악력</th><th>멀리뛰기</th><th>유연성</th>
+            <th style="background:#1a3a5c;min-width:60px">전체등급</th>
+          </tr>
+        </thead>
+        <tbody id="grade-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Confirm Modal -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal">
+    <div class="modal-title">⚠️ 모든 기록 삭제</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6">저장된 측정 기록이 모두 삭제됩니다.<br>이 작업은 되돌릴 수 없습니다.</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('reset-modal')">취소</button>
+      <button class="btn btn-danger" style="flex:1" onclick="doReset()">삭제 확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ STATE ═══════════════
+const DEFAULT_PIN = '082983';
+let adminPin = localStorage.getItem('paps_pin') || DEFAULT_PIN;
+let isAdmin = false;
+let pinBuffer = '';
+
+// Current session
+let curGrade = '', curClass = '', curStudentIdx = 0;
+let students = [];
+let activeEvents = [];
+let allRecords = JSON.parse(localStorage.getItem('paps_records') || '{}');
+
+// 학년별 반 수
+const CLASS_COUNT = { '1': 3, '2': 4, '3': 4 };
+
+// ═══════════════ EVENTS CONFIG ═══════════════
+const EVENTS = [
+  { id: 'run',  name: '왕복오래달리기', icon: '🏃', sub: '심폐지구력 · 20m 왕복', unit: '회' },
+  { id: 'grip', name: '악력',           icon: '💪', sub: '우1→좌1→우2→좌2 순서', unit: 'kg' },
+  { id: 'jump', name: '제자리멀리뛰기', icon: '🦘', sub: '2회 측정, 좋은 기록 채택', unit: 'cm' },
+  { id: 'flex', name: '유연성',          icon: '🤸', sub: '앉아윗몸앞으로굽히기 2회', unit: 'cm' },
+  { id: 'bmi',  name: '키/몸무게(BMI)', icon: '⚖️', sub: '관리자 전용 · BMI 자동계산', unit: '' },
+];
+
+// ═══════════════ 중학교 평가기준표 (교육부 PDF 기준) ═══════════════
+// 각 배열: [5등급(아주낮음), 4등급(낮음), 3등급(보통), 2등급(높음), 1등급(아주높음)]
+// 각 항목: [최솟값, 최댓값]
+
+// 왕복오래달리기 (회)
+const TB_RUN = {
+  '남': {
+    '1': [[15,19],[20,35],[36,49],[50,63],[64,73]],
+    '2': [[15,21],[22,37],[38,51],[52,65],[66,75]],
+    '3': [[16,23],[24,39],[40,53],[54,67],[68,79]]
+  },
+  '여': {
+    '1': [[10,13],[14,18],[19,24],[25,34],[35,70]],
+    '2': [[10,14],[15,20],[21,28],[29,39],[40,75]],
+    '3': [[12,15],[16,22],[23,32],[33,44],[45,80]]
+  }
+};
+
+// 악력 (kg) — 좌우 최고값 평균
+const TB_GRIP = {
+  '남': {
+    '1': [[14.4,16.4],[16.5,22.4],[22.5,29.9],[30.0,41.9],[42.0,46.0]],
+    '2': [[19.1,21.9],[22.0,28.4],[28.5,36.9],[37.0,44.4],[44.5,47.0]],
+    '3': [[19.1,24.9],[25.0,32.9],[33.0,40.4],[40.5,48.4],[48.5,50.0]]
+  },
+  '여': {
+    '1': [[11.9,13.9],[14.0,18.9],[19.0,22.9],[23.0,35.9],[36.0,38.0]],
+    '2': [[13.0,13.9],[14.0,19.4],[19.5,25.4],[25.5,35.9],[36.0,38.0]],
+    '3': [[14.9,15.9],[16.0,19.4],[19.5,27.4],[27.5,35.9],[36.0,38.0]]
+  }
+};
+
+// 제자리멀리뛰기 (cm)
+const TB_JUMP = {
+  '남': {
+    '1': [[122.9,131.0],[131.1,159.0],[159.1,177.0],[177.1,211.0],[211.1,219.7]],
+    '2': [[129.9,136.0],[136.1,169.0],[169.1,187.0],[187.1,218.0],[218.1,229.3]],
+    '3': [[141.4,145.0],[145.1,180.0],[180.1,201.0],[201.1,238.0],[238.1,244.0]]
+  },
+  '여': {
+    '1': [[89.9,100.0],[100.1,127.0],[127.1,144.0],[144.1,175.0],[175.1,180.5]],
+    '2': [[93.9,100.0],[100.1,127.0],[127.1,145.0],[145.1,183.0],[183.1,198.0]],
+    '3': [[94.9,100.0],[100.1,127.0],[127.1,145.0],[145.1,183.0],[183.1,198.0]]
+  }
+};
+
+// 앉아윗몸앞으로굽히기 (cm)
+const TB_FLEX = {
+  '남': {
+    '1': [[-5.1,-4.1],[-4.0, 1.9],[2.0, 5.9],[ 6.0, 9.9],[10.0,25.0]],
+    '2': [[-5.1,-4.1],[-4.0, 1.9],[2.0, 6.9],[ 7.0, 9.9],[10.0,25.0]],
+    '3': [[-5.1,-3.1],[-3.0, 2.5],[2.6, 6.9],[ 7.0, 9.9],[10.0,25.0]]
+  },
+  '여': {
+    '1': [[-0.1, 1.9],[2.0, 7.9],[8.0,10.9],[11.0,14.9],[15.0,28.0]],
+    '2': [[-0.1, 1.9],[2.0, 7.9],[8.0,10.9],[11.0,14.9],[15.0,28.0]],
+    '3': [[-0.1, 1.9],[2.0, 7.9],[8.0,10.9],[11.0,15.9],[16.0,28.0]]
+  }
+};
+
+// BMI 기준 (중학교, 교육부 PDF p.25)
+const TB_BMI = {
+  '남': {
+    '1': { thin:15.3, normalMax:23.2, overMax:24.9, obese1Max:29.9 },
+    '2': { thin:15.7, normalMax:23.8, overMax:24.9, obese1Max:29.9 },
+    '3': { thin:16.2, normalMax:24.3, overMax:24.9, obese1Max:29.9 }
+  },
+  '여': {
+    '1': { thin:15.1, normalMax:22.1, overMax:24.7, obese1Max:29.9 },
+    '2': { thin:15.6, normalMax:22.7, overMax:24.9, obese1Max:29.9 },
+    '3': { thin:16.2, normalMax:23.2, overMax:24.9, obese1Max:29.9 }
+  }
+};
+
+// calcGrade: 배열 index 0=5등급(아주낮음), index 4=1등급(아주높음)
+// 반환값: 1(아주높음) ~ 5(아주낮음)
+function calcGrade(table, gender, grade, value) {
+  if (!gender || !grade || value === '' || value === undefined || isNaN(parseFloat(value))) return '';
+  const rows = table[gender]?.[String(grade)];
+  if (!rows) return '';
+  const v = parseFloat(value);
+  for (let i = 0; i < 5; i++) {
+    if (v >= rows[i][0] && v <= rows[i][1]) return (5 - i); // index0→5등급, index4→1등급
+  }
+  if (v < rows[0][0]) return 5;
+  if (v > rows[4][1]) return 1;
+  return '';
+}
+
+function getBmiInfo(gender, grade, bmi) {
+  if (!gender || !grade || !bmi || isNaN(bmi)) return { label:'—', color:'var(--muted)', cls:'' };
+  const t = TB_BMI[gender]?.[String(grade)];
+  if (!t) return { label:'—', color:'var(--muted)', cls:'' };
+  const v = parseFloat(bmi);
+  if (v < t.thin)        return { label:'마름',     color:'#2196f3', cls:'g4' };
+  if (v <= t.normalMax)  return { label:'정상',     color:'#4caf50', cls:'g2' };
+  if (v <= t.overMax)    return { label:'과체중',   color:'#ff9800', cls:'g3' };
+  if (v <= t.obese1Max)  return { label:'경도비만', color:'#f44336', cls:'g5' };
+  return { label:'고도비만', color:'#b71c1c', cls:'g5' };
+}
+function bmiPercent(bmi) {
+  const v = parseFloat(bmi);
+  if (isNaN(v)) return 0;
+  return Math.max(0, Math.min(100, (v - 13) / (32 - 13) * 100)).toFixed(1);
+}
+
+function gradeClass(g) {
+  if (!g) return '';
+  // g=1(아주높음)→g1(주황), g=5(아주낮음)→g5(빨강)
+  return ['','g1','g2','g3','g4','g5'][g] || '';
+}
+function gradeShort(g) {
+  if (!g) return '—';
+  return ['','1등급','2등급','3등급','4등급','5등급'][g] || '—';
+}
+function gradeLabel(g) {
+  if (!g) return '—';
+  const names = ['','1등급(아주높음)','2등급(높음)','3등급(보통)','4등급(낮음)','5등급(아주낮음)'];
+  return names[g] || '—';
+}
+
+// ═══════════════ PIN ═══════════════
+function openAdminPin() {
+  pinBuffer = ''; pinMode = 'login';
+  renderPinDots();
+  document.getElementById('pin-sub-text').textContent = 'PIN을 입력하세요';
+  document.getElementById('pin-overlay').style.display = 'flex';
+}
+function closePinOverlay() {
+  document.getElementById('pin-overlay').style.display = 'none';
+  pinBuffer = '';
+  renderPinDots();
+}
+function pinInput(n) {
+  if (pinBuffer.length >= 8) return;
+  pinBuffer += n;
+  renderPinDots();
+  // 자동 체크 안 함 — 확인 버튼으로만 체크
+}
+function pinConfirm() {
+  if (pinBuffer.length < 4) {
+    document.getElementById('pin-sub-text').textContent = '❗ 4자리 이상 입력하세요';
+    return;
+  }
+  checkPin();
+}
+function pinBack() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  renderPinDots();
+}
+function renderPinDots() {
+  const maxDots = 6;
+  for (let i = 0; i < maxDots; i++) {
+    const d = document.getElementById('pd' + i);
+    if (!d) continue;
+    d.classList.remove('filled', 'error');
+    if (i < pinBuffer.length) d.classList.add('filled');
+  }
+}
+function checkPin() {
+  if (pinBuffer === adminPin) {
+    isAdmin = true;
+    document.getElementById('admin-btn').classList.add('active');
+    document.getElementById('admin-btn').textContent = '✅ 관리자';
+    document.getElementById('pin-overlay').style.display = 'none';
+    pinBuffer = ''; renderPinDots();
+    // 관리자 UI 표시
+    const adminBar = document.getElementById('admin-action-bar');
+    if (adminBar) adminBar.style.display = 'block';
+    const pinCard = document.getElementById('pin-change-card');
+    if (pinCard) pinCard.style.display = 'block';
+    const toggleBtn = document.getElementById('dash-admin-toggle-btn');
+    if (toggleBtn) { toggleBtn.textContent = '🔓 로그아웃'; toggleBtn.style.color = '#e65100'; toggleBtn.style.borderColor = '#ff9800'; }
+    renderDashboard();
+    // BMI 입력 잠금 해제
+    const bmiInputs = document.getElementById('bmi-inputs');
+    if (bmiInputs) bmiInputs.style.display = 'block';
+    const bmiLocked = document.getElementById('bmi-locked-msg');
+    if (bmiLocked) bmiLocked.style.display = 'none';
+  } else {
+    document.querySelectorAll('.pin-dot.filled').forEach(d => d.classList.add('error'));
+    document.getElementById('pin-sub-text').textContent = '❌ 잘못된 PIN입니다';
+    setTimeout(() => {
+      pinBuffer = ''; renderPinDots();
+      document.getElementById('pin-sub-text').textContent = 'PIN을 입력하세요';
+    }, 800);
+  }
+}
+function adminLogout() {
+  isAdmin = false;
+  document.getElementById('admin-btn').classList.remove('active');
+  document.getElementById('admin-btn').textContent = '🛡️ 관리자';
+  const adminBar = document.getElementById('admin-action-bar');
+  if (adminBar) adminBar.style.display = 'none';
+  const pinCard = document.getElementById('pin-change-card');
+  if (pinCard) pinCard.style.display = 'none';
+  const toggleBtn = document.getElementById('dash-admin-toggle-btn');
+  if (toggleBtn) { toggleBtn.textContent = '🛡️ 관리자'; toggleBtn.style.color = ''; toggleBtn.style.borderColor = ''; }
+  renderDashboard();
+}
+function changePin() {
+  const cur = document.getElementById('cur-pin').value;
+  const n1 = document.getElementById('new-pin').value;
+  const n2 = document.getElementById('new-pin2').value;
+  if (cur !== adminPin) { alert('현재 PIN이 올바르지 않습니다.'); return; }
+  if (!/^\d{4,8}$/.test(n1)) { alert('새 PIN은 4~8자리 숫자여야 합니다.'); return; }
+  if (n1 !== n2) { alert('새 PIN이 일치하지 않습니다.'); return; }
+  adminPin = n1;
+  localStorage.setItem('paps_pin', n1);
+  alert('✅ PIN이 변경되었습니다.');
+  document.getElementById('cur-pin').value = '';
+  document.getElementById('new-pin').value = '';
+  document.getElementById('new-pin2').value = '';
+}
+
+// ═══════════════ NAVIGATION ═══════════════
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tnav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('bnav-' + name).classList.add('active');
+  if (name === 'dash')  renderDashboard();
+  if (name === 'roster') renderSavedRosters();
+  if (name === 'grade') renderGradeSummary();
+}
+
+// ═══════════════ GRADE SUMMARY ═══════════════
+function gradeFilterChange() {
+  const g = document.getElementById('grade-filter-g').value;
+  const cs = document.getElementById('grade-filter-c');
+  cs.innerHTML = '<option value="">전체 반</option>';
+  if (g) {
+    const cnt = CLASS_COUNT[g] || 4;
+    for (let i = 1; i <= cnt; i++) {
+      const o = document.createElement('option');
+      o.value = i; o.textContent = i + '반'; cs.appendChild(o);
+    }
+  }
+  renderGradeSummary();
+}
+
+function calcOverallGrade(stu, g) {
+  const grades = [];
+  // 왕복오래달리기
+  if (stu.data.run) {
+    const gr = calcGrade(TB_RUN, stu.gender, g, parseInt(stu.data.run));
+    if (gr) grades.push(gr);
+  }
+  // 악력
+  const dg = stu.data.grip || {};
+  const rB = Math.max(parseFloat(dg.r1)||0, parseFloat(dg.r2)||0);
+  const lB = Math.max(parseFloat(dg.l1)||0, parseFloat(dg.l2)||0);
+  if (rB && lB) {
+    const avg = (rB + lB) / 2;
+    const gr = calcGrade(TB_GRIP, stu.gender, g, avg);
+    if (gr) grades.push(gr);
+  }
+  // 제자리멀리뛰기
+  const dj = stu.data.jump || {};
+  const jb = Math.max(parseFloat(dj.t1)||0, parseFloat(dj.t2)||0);
+  if (jb) {
+    const gr = calcGrade(TB_JUMP, stu.gender, g, jb);
+    if (gr) grades.push(gr);
+  }
+  // 유연성
+  const df = stu.data.flex || {};
+  if (df.t1 !== undefined && df.t1 !== '') {
+    const fb = Math.max(parseFloat(df.t1)||-999, parseFloat(df.t2)||-999);
+    const gr = calcGrade(TB_FLEX, stu.gender, g, fb);
+    if (gr) grades.push(gr);
+  }
+  if (!grades.length) return '';
+  const avg = grades.reduce((a, b) => a + b, 0) / grades.length;
+  return Math.round(avg);
+}
+
+function renderGradeSummary() {
+  const fg = document.getElementById('grade-filter-g')?.value || '';
+  const fc = document.getElementById('grade-filter-c')?.value || '';
+  const tbody = document.getElementById('grade-tbody');
+  tbody.innerHTML = '';
+  const dist = {1:0, 2:0, 3:0, 4:0, 5:0};
+
+  Object.keys(allRecords).sort().forEach(key => {
+    const [g, c] = key.split('-');
+    if (fg && g !== fg) return;
+    if (fc && c !== fc) return;
+    allRecords[key].forEach(stu => {
+      if (stu.status === 'absent') return;
+
+      const run = stu.data.run || '';
+      const runG  = run ? calcGrade(TB_RUN,  stu.gender, g, parseInt(run)) : '';
+      const dg = stu.data.grip || {};
+      const rB = Math.max(parseFloat(dg.r1)||0, parseFloat(dg.r2)||0);
+      const lB = Math.max(parseFloat(dg.l1)||0, parseFloat(dg.l2)||0);
+      const gripG = (rB&&lB) ? calcGrade(TB_GRIP, stu.gender, g, (rB+lB)/2) : '';
+      const dj = stu.data.jump || {};
+      const jb  = Math.max(parseFloat(dj.t1)||0, parseFloat(dj.t2)||0);
+      const jumpG = jb ? calcGrade(TB_JUMP, stu.gender, g, jb) : '';
+      const df = stu.data.flex || {};
+      const fb  = (df.t1!==undefined&&df.t1!=='') ? Math.max(parseFloat(df.t1)||-999,parseFloat(df.t2)||-999) : '';
+      const flexG = fb!=='' ? calcGrade(TB_FLEX, stu.gender, g, fb) : '';
+
+      const overall = calcOverallGrade(stu, g);
+      if (overall) dist[overall] = (dist[overall]||0) + 1;
+
+      const gc = gradeClass(overall);
+      const gcColors = {1:'#e65100',2:'#2e7d32',3:'#1565c0',4:'#6a1b9a',5:'#c62828'};
+      const overallBg = overall ? `background:${gcColors[overall]}15;color:${gcColors[overall]};font-weight:800;font-size:14px` : '';
+
+      tbody.innerHTML += `<tr>
+        <td><b>${g}-${c}-${stu.num}</b></td>
+        <td>${stu.name||'—'}</td>
+        <td>${stu.gender||'—'}</td>
+        <td><span class="grade-badge ${gradeClass(runG)}" style="font-size:11px;padding:3px 8px">${gradeShort(runG)}</span></td>
+        <td><span class="grade-badge ${gradeClass(gripG)}" style="font-size:11px;padding:3px 8px">${gradeShort(gripG)}</span></td>
+        <td><span class="grade-badge ${gradeClass(jumpG)}" style="font-size:11px;padding:3px 8px">${gradeShort(jumpG)}</span></td>
+        <td><span class="grade-badge ${gradeClass(flexG)}" style="font-size:11px;padding:3px 8px">${gradeShort(flexG)}</span></td>
+        <td style="text-align:center"><span style="display:inline-block;border-radius:8px;padding:5px 10px;${overallBg}">${overall ? overall+'등급' : '—'}</span></td>
+      </tr>`;
+    });
+  });
+
+  [1,2,3,4,5].forEach(i => {
+    const el = document.getElementById('gd'+i);
+    if (el) el.textContent = dist[i] || 0;
+  });
+
+  if (!tbody.innerHTML) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">기록 없음</td></tr>';
+  }
+}
+
+// ═══════════════ 내장 학생 명단 (학생명렬표 PDF) ═══════════════
+// 형식: '학년-반': [{num, name}]
+// 성별은 측정 시 직접 입력 (명렬표에 성별 없음)
+const BUILTIN_ROSTER = {
+  '1-1': [
+    {num:1,name:'강민정'},{num:2,name:'김도희'},{num:3,name:'김아라'},
+    {num:4,name:'김채현'},{num:5,name:'박주연'},{num:6,name:'서수아'},
+    {num:7,name:'신예주'},{num:8,name:'윤예진'},{num:10,name:'장윤서'},
+    {num:11,name:'정지우'},{num:12,name:'조아윤'},{num:13,name:'한지연'},
+    {num:14,name:'SAIM MUHAMMAD'},{num:15,name:'김동규'},{num:16,name:'김태웅'},
+    {num:17,name:'문익재'},{num:18,name:'박제준'},{num:19,name:'송선규'},
+    {num:20,name:'우동하'},{num:21,name:'이동욱'},{num:22,name:'이용석'},
+    {num:23,name:'이지오'},{num:24,name:'이화담'},{num:25,name:'정믿음'},
+    {num:26,name:'정이현'},{num:27,name:'하동훈'}
+  ],
+  '1-2': [
+    {num:1,name:'강다은'},{num:2,name:'김라윤'},{num:3,name:'김수정'},
+    {num:4,name:'김하린'},{num:5,name:'박재인'},{num:6,name:'성시윤'},
+    {num:7,name:'신수지'},{num:8,name:'안다희'},{num:9,name:'윤채영'},
+    {num:10,name:'이세민'},{num:11,name:'정아연'},{num:12,name:'정지민'},
+    {num:13,name:'최미나'},{num:14,name:'하수아'},{num:15,name:'김유진'},
+    {num:16,name:'김은찬'},{num:17,name:'박건우'},{num:18,name:'박단'},
+    {num:19,name:'송예준'},{num:20,name:'신희철'},{num:21,name:'이민혁'},
+    {num:22,name:'이수안'},{num:23,name:'이지훈'},{num:24,name:'이호준'},
+    {num:25,name:'정시윤'},{num:26,name:'조성민'},{num:27,name:'한태진'}
+  ],
+  '1-3': [
+    {num:1,name:'김나연'},{num:2,name:'김다정'},{num:3,name:'김여나'},
+    {num:4,name:'김채원'},{num:5,name:'변지민'},{num:6,name:'변채빈'},
+    {num:7,name:'양다희'},{num:8,name:'이시은'},{num:9,name:'이채원'},
+    {num:10,name:'정하늘'},{num:11,name:'정하은'},{num:12,name:'NEMATOV ZHASSURBEK'},
+    {num:13,name:'곽지호'},{num:14,name:'구가람'},{num:15,name:'남궁시후'},
+    {num:16,name:'노현우'},{num:17,name:'박준형'},{num:18,name:'성찬혁'},
+    {num:19,name:'우시율'},{num:20,name:'이남규'},{num:21,name:'이태운'},
+    {num:22,name:'이주환'},{num:23,name:'전으뜸'},{num:24,name:'정규진'},
+    {num:25,name:'최재영'},{num:26,name:'최하윤'},{num:27,name:'허민'}
+  ],
+  '2-1': [
+    {num:1,name:'김나현'},{num:2,name:'김민서'},{num:3,name:'김민지'},
+    {num:4,name:'김세진'},{num:5,name:'김예서'},{num:6,name:'김지혜'},
+    {num:7,name:'김하람'},{num:8,name:'김한나'},{num:9,name:'류시원'},
+    {num:10,name:'박가현'},{num:11,name:'박은서'},{num:12,name:'박채린'},
+    {num:13,name:'우별하'},{num:14,name:'유은아'},{num:15,name:'강보승'},
+    {num:16,name:'김승준'},{num:17,name:'김시율'},{num:18,name:'김치헌'},
+    {num:19,name:'남광훈'},{num:20,name:'박현서'},{num:21,name:'송민규'},
+    {num:22,name:'이동기'},{num:23,name:'이주원'},{num:24,name:'임재혁'},
+    {num:25,name:'허준석'},{num:26,name:'홍찬우'},{num:27,name:'황정윤'},
+    {num:28,name:'김규빈'}
+  ],
+  '2-2': [
+    {num:1,name:'김미소'},{num:2,name:'김서아'},{num:3,name:'박소윤'},
+    {num:4,name:'서하영'},{num:5,name:'송예빈'},{num:6,name:'여은서'},
+    {num:7,name:'윤채은'},{num:8,name:'전지윤'},{num:9,name:'정은아'},
+    {num:10,name:'정재이'},{num:11,name:'주연하'},{num:12,name:'천다은'},
+    {num:13,name:'최성경'},{num:14,name:'최오름'},{num:15,name:'황하율'},
+    {num:16,name:'고희승'},{num:17,name:'김동규'},{num:18,name:'김서준'},
+    {num:19,name:'노우찬'},{num:20,name:'박영광'},{num:21,name:'송세민'},
+    {num:22,name:'이정민'},{num:23,name:'이희성'},{num:24,name:'정민우'},
+    {num:25,name:'조성훈'},{num:26,name:'조주원'},{num:27,name:'최용빈'},
+    {num:28,name:'최현규'}
+  ],
+  '2-3': [
+    {num:1,name:'구미주'},{num:2,name:'길유나'},{num:3,name:'김도희'},
+    {num:4,name:'김민설'},{num:5,name:'김보영'},{num:6,name:'김아름'},
+    {num:7,name:'문지인'},{num:8,name:'양하빈'},{num:9,name:'유채은'},
+    {num:10,name:'이나연'},{num:11,name:'이소윤'},{num:12,name:'이한별'},
+    {num:13,name:'장초희'},{num:14,name:'주민경'},{num:15,name:'김민준'},
+    {num:16,name:'김산'},{num:18,name:'박선호'},{num:19,name:'서희승'},
+    {num:20,name:'송진우'},{num:21,name:'안호림'},{num:22,name:'이두영'},
+    {num:23,name:'장민기'},{num:24,name:'정종민'},{num:25,name:'조민석'},
+    {num:26,name:'한현진'},{num:27,name:'황성민'}
+  ],
+  '2-4': [
+    {num:1,name:'강다희'},{num:2,name:'강혜빈'},{num:3,name:'김민서'},
+    {num:4,name:'김보경'},{num:5,name:'김세은'},{num:6,name:'김예원'},
+    {num:7,name:'김율아'},{num:8,name:'박서연'},{num:9,name:'배윤서'},
+    {num:10,name:'송세경'},{num:11,name:'신여진'},{num:12,name:'윤서현'},
+    {num:13,name:'이혜인'},{num:14,name:'정하린'},{num:15,name:'강병국'},
+    {num:16,name:'강성룡'},{num:17,name:'김가람'},{num:18,name:'민준영'},
+    {num:19,name:'박건호'},{num:20,name:'이은규'},{num:21,name:'이준서'},
+    {num:22,name:'이창민'},{num:23,name:'장성욱'},{num:24,name:'조민석'},
+    {num:25,name:'탁민수'},{num:26,name:'허동우'},{num:27,name:'허율'}
+  ],
+  '3-1': [
+    {num:1,name:'김가연'},{num:2,name:'김가윤'},{num:3,name:'김수정'},
+    {num:4,name:'김지유'},{num:5,name:'문세연'},{num:6,name:'신예슬'},
+    {num:7,name:'염운경'},{num:8,name:'이지유'},{num:9,name:'이태희'},
+    {num:10,name:'김민준'},{num:11,name:'김범진'},{num:12,name:'김성우'},
+    {num:13,name:'박성빈'},{num:14,name:'서승환'},{num:15,name:'유현우'},
+    {num:16,name:'이동규'},{num:17,name:'이재준'},{num:18,name:'조백암'},
+    {num:19,name:'조신우'},{num:20,name:'주하랑'},{num:21,name:'진우진'},
+    {num:22,name:'최윤혁'},{num:23,name:'하준원'},{num:24,name:'부현민'},
+    {num:25,name:'김지민'}
+  ],
+  '3-2': [
+    {num:1,name:'김나현'},{num:2,name:'김은별'},{num:3,name:'김지은'},
+    {num:4,name:'성유림'},{num:5,name:'신소윤'},{num:6,name:'장아영'},
+    {num:7,name:'장하효'},{num:8,name:'정아인'},{num:9,name:'조현진'},
+    {num:10,name:'김도훈'},{num:11,name:'김재훈'},{num:12,name:'박기백'},
+    {num:13,name:'박시후'},{num:14,name:'박재민'},{num:15,name:'배재현'},
+    {num:16,name:'송정우'},{num:17,name:'이강산'},{num:18,name:'이경민'},
+    {num:19,name:'이현서'},{num:20,name:'임한결'},{num:21,name:'정성빈'},
+    {num:22,name:'조채훈'},{num:23,name:'조형우'},{num:24,name:'임유이'}
+  ],
+  '3-3': [
+    {num:1,name:'강경희'},{num:2,name:'김나언'},{num:3,name:'배민서'},
+    {num:4,name:'오예림'},{num:5,name:'우혜윤'},{num:6,name:'이수정'},
+    {num:7,name:'이아린'},{num:8,name:'지세빈'},{num:9,name:'천민재'},
+    {num:10,name:'구승빈'},{num:11,name:'박윤'},{num:12,name:'박준석'},
+    {num:13,name:'신유철'},{num:14,name:'신지환'},{num:15,name:'윤수현'},
+    {num:16,name:'이석하'},{num:17,name:'이성호'},{num:18,name:'이시후'},
+    {num:19,name:'이연후'},{num:20,name:'이지원'},{num:21,name:'이하온'},
+    {num:22,name:'임준범'},{num:23,name:'전서현'},{num:24,name:'최예준'}
+  ],
+  '3-4': [
+    {num:1,name:'박은빈'},{num:2,name:'박준희'},{num:3,name:'서민정'},
+    {num:4,name:'송채은'},{num:5,name:'유서연'},{num:6,name:'이영채'},
+    {num:7,name:'조수경'},{num:8,name:'차지윤'},{num:9,name:'허서은'},
+    {num:10,name:'김동현'},{num:11,name:'도용환'},{num:12,name:'서이준'},
+    {num:13,name:'신서윤'},{num:14,name:'안도현'},{num:15,name:'이동건'},
+    {num:16,name:'이승현'},{num:17,name:'이정빈'},{num:18,name:'이현민'},
+    {num:19,name:'이현준'},{num:20,name:'임준혁'},{num:21,name:'임철민'},
+    {num:22,name:'주민규'},{num:23,name:'최한규'},{num:24,name:'부현진'}
+  ]
+};
+
+// 내장 명단에서 학생 이름 조회
+function getBuiltinName(grade, cls, num) {
+  const key = grade + '-' + cls;
+  const roster = BUILTIN_ROSTER[key];
+  if (!roster) return '';
+  const found = roster.find(s => s.num === parseInt(num));
+  return found ? found.name : '';
+}
+
+// ═══════════════ HOME SETUP ═══════════════
+function buildClassGrid() {
+  const grade = document.getElementById('sel-grade').value;
+  const grid = document.getElementById('class-grid');
+  grid.innerHTML = '';
+  if (!grade) return;
+  const cnt = CLASS_COUNT[grade] || 4;
+  for (let i = 1; i <= cnt; i++) {
+    const ch = document.createElement('div');
+    ch.className = 'class-chip';
+    ch.textContent = i + '반';
+    ch.dataset.class = i;
+    ch.onclick = function() {
+      document.querySelectorAll('.class-chip').forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+      curClass = this.dataset.class;
+    };
+    grid.appendChild(ch);
+  }
+  curClass = '';
+}
+
+function buildEventList() {
+  const list = document.getElementById('event-list');
+  list.innerHTML = '';
+  EVENTS.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'event-toggle on';
+    div.dataset.id = ev.id;
+    div.innerHTML = `
+      <div class="event-toggle-left">
+        <span class="event-icon">${ev.icon}</span>
+        <div>
+          <div class="event-name">${ev.name}</div>
+          <div class="event-sub">${ev.sub}</div>
+        </div>
+      </div>
+      <div class="toggle-switch"></div>
+    `;
+    div.onclick = function() {
+      this.classList.toggle('on');
+    };
+    list.appendChild(div);
+  });
+}
+
+function startMeasure() {
+  curGrade = document.getElementById('sel-grade').value;
+  if (!curGrade) { alert('학년을 선택하세요.'); return; }
+  if (!curClass) { alert('반을 선택하세요.'); return; }
+
+  activeEvents = [];
+  document.querySelectorAll('.event-toggle.on').forEach(el => {
+    const ev = EVENTS.find(e => e.id === el.dataset.id);
+    if (ev) activeEvents.push(ev);
+  });
+  if (activeEvents.length === 0) { alert('최소 1개 종목을 선택하세요.'); return; }
+
+  // Load or init roster
+  const key = curGrade + '-' + curClass;
+  if (allRecords[key]) {
+    // 기존 기록이 있으면 이름이 빈 경우 내장 명단으로 채움
+    students = allRecords[key].map(s => ({
+      ...s,
+      name: s.name || getBuiltinName(curGrade, curClass, s.num)
+    }));
+  } else {
+    // 내장 명단 우선, 없으면 localStorage 로스터, 그것도 없으면 기본 30명
+    const builtin = BUILTIN_ROSTER[key];
+    const savedRoster = localStorage.getItem('paps_roster_' + key);
+    if (builtin) {
+      students = builtin.map(s => ({ num: s.num, name: s.name, gender: '', data: {}, status: 'none', memo: '' }));
+    } else if (savedRoster) {
+      students = JSON.parse(savedRoster);
+    } else {
+      students = [];
+      for (let i = 1; i <= 30; i++) {
+        students.push({ num: i, name: '', gender: '', data: {}, status: 'none', memo: '' });
+      }
+    }
+  }
+  curStudentIdx = 0;
+  allRecords[key] = students;
+  saveRecords();
+
+  document.getElementById('nav-classinfo').textContent = curGrade + '학년 ' + curClass + '반';
+  goPage('measure');
+  renderStudent();
+}
+
+// ═══════════════ ROSTER ═══════════════
+function saveRoster() {
+  const grade = document.getElementById('roster-grade').value;
+  const cls = document.getElementById('roster-class').value;
+  const text = document.getElementById('roster-text').value.trim();
+  if (!grade || !cls) { alert('학년과 반을 선택하세요.'); return; }
+  if (!text) { alert('명단을 입력하세요.'); return; }
+
+  const lines = text.split('\n').filter(l => l.trim());
+  const arr = lines.map((line, idx) => {
+    const parts = line.split(',').map(p => p.trim());
+    let num, name, gender = '';
+    if (parts.length >= 3) {
+      num = parseInt(parts[0]) || (idx + 1);
+      name = parts[1];
+      gender = parts[2] === '남' || parts[2].toLowerCase() === 'm' ? '남' : (parts[2] === '여' || parts[2].toLowerCase() === 'f' ? '여' : '');
+    } else if (parts.length === 2) {
+      if (!isNaN(parts[0])) { num = parseInt(parts[0]); name = parts[1]; }
+      else { num = idx + 1; name = parts[0]; gender = parts[1] === '남' || parts[1].toLowerCase() === 'm' ? '남' : '여'; }
+    } else {
+      num = idx + 1; name = parts[0];
+    }
+    return { num, name, gender, data: {}, status: 'none', memo: '' };
+  });
+
+  const key = grade + '-' + cls;
+  localStorage.setItem('paps_roster_' + key, JSON.stringify(arr));
+  alert('✅ ' + grade + '학년 ' + cls + '반 명단 ' + arr.length + '명 저장됨');
+  document.getElementById('roster-text').value = '';
+  renderSavedRosters();
+}
+
+function renderSavedRosters() {
+  const el = document.getElementById('saved-rosters-list');
+  let html = '';
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('paps_roster_'));
+  if (keys.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">저장된 명단 없음</div>'; return; }
+  keys.sort().forEach(k => {
+    const id = k.replace('paps_roster_', '');
+    const [g, c] = id.split('-');
+    const data = JSON.parse(localStorage.getItem(k));
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:700;font-size:14px">${g}학년 ${c}반</div>
+        <div style="font-size:12px;color:var(--muted)">${data.length}명</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-primary" onclick="loadRosterToMeasure('${id}')">측정 시작</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRoster('${k}')">삭제</button>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function loadRosterToMeasure(id) {
+  const [g, c] = id.split('-');
+  document.getElementById('sel-grade').value = g;
+  buildClassGrid();
+  setTimeout(() => {
+    const chip = document.querySelector('.class-chip[data-class="' + c + '"]');
+    if (chip) chip.click();
+  }, 50);
+  // ensure all events on
+  document.querySelectorAll('.event-toggle').forEach(e => e.classList.add('on'));
+  goPage('home');
+}
+
+function deleteRoster(key) {
+  if (confirm('이 명단을 삭제할까요?')) {
+    localStorage.removeItem(key);
+    renderSavedRosters();
+  }
+}
+
+// ═══════════════ STUDENT RENDER ═══════════════
+function renderStudent() {
+  const stu = students[curStudentIdx];
+  if (!stu) return;
+  document.getElementById('stu-num').textContent = stu.num;
+  document.getElementById('stu-name').value = stu.name || '';
+  document.getElementById('memo-input').value = stu.memo || '';
+
+  // Gender buttons
+  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+  if (stu.gender === '남') document.querySelector('.gender-btn.m').classList.add('selected');
+  if (stu.gender === '여') document.querySelector('.gender-btn.f').classList.add('selected');
+
+  // Progress
+  const done = students.filter(s => s.status === 'done').length;
+  document.getElementById('nav-progress').textContent = done + ' / ' + students.length + '명 완료';
+  document.getElementById('progress-bar').style.width = (done / students.length * 100) + '%';
+
+  document.getElementById('btn-prev').disabled = curStudentIdx === 0;
+  document.getElementById('btn-next').disabled = curStudentIdx === students.length - 1;
+
+  renderEvents();
+}
+
+function renderEvents() {
+  const stu = students[curStudentIdx];
+  const container = document.getElementById('events-container');
+  container.innerHTML = '';
+
+  activeEvents.forEach(ev => {
+    const sec = document.createElement('div');
+    sec.className = 'event-section fade-in';
+    sec.id = 'ev-' + ev.id;
+
+    if (ev.id === 'run') {
+      const val = stu.data.run || '';
+      const g = calcGrade(TB_RUN, stu.gender, curGrade, parseInt(val));
+      sec.innerHTML = `
+        <div class="event-header">
+          <span class="icon">${ev.icon}</span>
+          <div><div class="name">${ev.name}</div><div class="desc">${ev.sub}</div></div>
+          <div class="grade-badge ${gradeClass(g)}" id="run-grade-badge">${gradeShort(g)}</div>
+        </div>
+        <div class="form-group">
+          <label>완료 횟수 (회)</label>
+          <input type="number" id="inp-run" value="${val}" placeholder="횟수 입력" min="0" oninput="onRunInput(this.value)">
+        </div>
+        <div class="auto-result" id="run-result">${val ? '입력: <strong>'+val+'회</strong> → '+gradeLabel(g) : '횟수를 입력하면 자동 계산됩니다'}</div>
+        <div class="grade-info-box">중1남: 64회↑(1등급) · 중2남: 66회↑(1등급) · 중3남: 68회↑(1등급)<br>중1여: 35회↑(1등급) · 중2여: 40회↑(1등급) · 중3여: 45회↑(1등급)</div>`;
+
+    } else if (ev.id === 'grip') {
+      const d = stu.data.grip || {};
+      const r1 = d.r1||'', l1 = d.l1||'', r2 = d.r2||'', l2 = d.l2||'';
+      const rBest = Math.max(parseFloat(r1)||0, parseFloat(r2)||0);
+      const lBest = Math.max(parseFloat(l1)||0, parseFloat(l2)||0);
+      const avg = (rBest > 0 && lBest > 0) ? ((rBest + lBest) / 2).toFixed(1) : '';
+      const g = calcGrade(TB_GRIP, stu.gender, curGrade, parseFloat(avg));
+      sec.innerHTML = `
+        <div class="event-header">
+          <span class="icon">${ev.icon}</span>
+          <div><div class="name">${ev.name}</div><div class="desc">${ev.sub}</div></div>
+          <div class="grade-badge ${gradeClass(g)}" id="grip-grade-badge">${gradeShort(g)}</div>
+        </div>
+        <div class="grip-grid">
+          <div class="grip-cell"><label>우 1회 (kg)</label><input type="number" id="grip-r1" value="${r1}" placeholder="0.0" step="0.1" oninput="onGripInput()"></div>
+          <div class="grip-cell"><label>좌 1회 (kg)</label><input type="number" id="grip-l1" value="${l1}" placeholder="0.0" step="0.1" oninput="onGripInput()"></div>
+          <div class="grip-cell"><label>우 2회 (kg)</label><input type="number" id="grip-r2" value="${r2}" placeholder="0.0" step="0.1" oninput="onGripInput()"></div>
+          <div class="grip-cell"><label>좌 2회 (kg)</label><input type="number" id="grip-l2" value="${l2}" placeholder="0.0" step="0.1" oninput="onGripInput()"></div>
+        </div>
+        <div class="auto-result" id="grip-result">우 최고 ${rBest||'—'}kg | 좌 최고 ${lBest||'—'}kg | 평균 ${avg||'—'}kg → ${gradeLabel(g)}</div>`;
+
+    } else if (ev.id === 'jump') {
+      const d = stu.data.jump || {};
+      const j1 = d.t1||'', j2 = d.t2||'';
+      const best = Math.max(parseFloat(j1)||0, parseFloat(j2)||0) || '';
+      const g = calcGrade(TB_JUMP, stu.gender, curGrade, parseFloat(best));
+      sec.innerHTML = `
+        <div class="event-header">
+          <span class="icon">${ev.icon}</span>
+          <div><div class="name">${ev.name}</div><div class="desc">${ev.sub}</div></div>
+          <div class="grade-badge ${gradeClass(g)}" id="jump-grade-badge">${gradeShort(g)}</div>
+        </div>
+        <div class="input-row">
+          <div class="form-group"><label>1회 (cm)</label><input type="number" id="jump-t1" value="${j1}" placeholder="0" oninput="onJumpInput()"></div>
+          <div class="form-group"><label>2회 (cm)</label><input type="number" id="jump-t2" value="${j2}" placeholder="0" oninput="onJumpInput()"></div>
+        </div>
+        <div class="auto-result" id="jump-result">채택: <strong>${best||'—'} cm</strong> → ${gradeLabel(g)}</div>`;
+
+    } else if (ev.id === 'flex') {
+      const d = stu.data.flex || {};
+      const f1 = d.t1 !== undefined ? d.t1 : '', f2 = d.t2 !== undefined ? d.t2 : '';
+      const bestVal = (f1 !== '' || f2 !== '') ? Math.max(parseFloat(f1)||-999, parseFloat(f2)||-999) : '';
+      const g = bestVal !== '' ? calcGrade(TB_FLEX, stu.gender, curGrade, parseFloat(bestVal)) : '';
+      sec.innerHTML = `
+        <div class="event-header">
+          <span class="icon">${ev.icon}</span>
+          <div><div class="name">${ev.name}</div><div class="desc">${ev.sub}</div></div>
+          <div class="grade-badge ${gradeClass(g)}" id="flex-grade-badge">${gradeShort(g)}</div>
+        </div>
+        <div class="input-row">
+          <div class="form-group"><label>1회 (cm)</label><input type="number" id="flex-t1" value="${f1}" placeholder="0.0" step="0.1" oninput="onFlexInput()"></div>
+          <div class="form-group"><label>2회 (cm)</label><input type="number" id="flex-t2" value="${f2}" placeholder="0.0" step="0.1" oninput="onFlexInput()"></div>
+        </div>
+        <div class="auto-result" id="flex-result">채택: <strong>${bestVal !== '' ? bestVal + ' cm' : '—'}</strong> → ${gradeLabel(g)}</div>
+        <div class="grade-info-box">음수(-)도 입력 가능합니다 (예: -3.5)</div>`;
+
+    } else if (ev.id === 'bmi') {
+      const d = stu.data.bmi || {};
+      const height = d.height || '';
+      const weight = d.weight || '';
+      const bmiVal = (height && weight) ? (weight / Math.pow(height / 100, 2)).toFixed(1) : '';
+      const cat = getBmiInfo(stu.gender, curGrade, bmiVal);
+      sec.innerHTML = `
+        <div class="event-header">
+          <span class="icon">${ev.icon}</span>
+          <div><div class="name">${ev.name}</div><div class="desc">${ev.sub}</div></div>
+          ${bmiVal ? '<div class="grade-badge '+cat.cls+'">'+bmiVal+'</div>' : ''}
+        </div>
+        <div id="bmi-locked-msg" style="${isAdmin ? 'display:none' : ''}">
+          <div class="status-banner info">🔒 키/몸무게는 관리자(교사) 전용입니다.<br>
+          <button class="btn btn-sm btn-primary" style="margin-top:6px" onclick="openAdminPin()">관리자 인증 후 입력</button></div>
+        </div>
+        <div id="bmi-inputs" style="${isAdmin ? '' : 'display:none'}">
+          <div class="input-row">
+            <div class="form-group"><label>키 (cm)</label><input type="number" id="bmi-height" value="${height}" placeholder="예) 165.0" step="0.1" oninput="onBmiInput()"></div>
+            <div class="form-group"><label>몸무게 (kg)</label><input type="number" id="bmi-weight" value="${weight}" placeholder="예) 58.0" step="0.1" oninput="onBmiInput()"></div>
+          </div>
+          <div class="auto-result" id="bmi-result">
+            ${bmiVal ? 'BMI: <strong>'+bmiVal+'</strong> → <span style="color:'+cat.color+'">'+cat.label+'</span>' : '키와 몸무게를 입력하면 자동 계산됩니다'}
+          </div>
+          ${bmiVal ? '<div class="bmi-bar"><div class="bmi-marker" style="left:'+bmiPercent(bmiVal)+'%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)"><span>마름</span><span>정상</span><span>비만</span></div>' : ''}
+        </div>`;
+    }
+    container.appendChild(sec);
+  });
+}
+
+// ═══════════════ EVENT INPUT HANDLERS ═══════════════
+function onRunInput(val) {
+  const stu = students[curStudentIdx];
+  stu.data.run = val;
+  const g = calcGrade(TB_RUN, stu.gender, curGrade, parseInt(val));
+  const badge = document.getElementById('run-grade-badge');
+  if (badge) { badge.textContent = gradeShort(g); badge.className = 'grade-badge ' + gradeClass(g); }
+  const res = document.getElementById('run-result');
+  if (res) res.innerHTML = val ? '입력: <strong>' + val + '회</strong> → ' + gradeLabel(g) : '횟수를 입력하면 자동 계산됩니다';
+}
+
+function onGripInput() {
+  const stu = students[curStudentIdx];
+  const r1 = parseFloat(document.getElementById('grip-r1')?.value) || 0;
+  const l1 = parseFloat(document.getElementById('grip-l1')?.value) || 0;
+  const r2 = parseFloat(document.getElementById('grip-r2')?.value) || 0;
+  const l2 = parseFloat(document.getElementById('grip-l2')?.value) || 0;
+  stu.data.grip = { r1: document.getElementById('grip-r1')?.value, l1: document.getElementById('grip-l1')?.value, r2: document.getElementById('grip-r2')?.value, l2: document.getElementById('grip-l2')?.value };
+  const rBest = Math.max(r1, r2);
+  const lBest = Math.max(l1, l2);
+  const avg = (rBest > 0 && lBest > 0) ? ((rBest + lBest) / 2).toFixed(1) : '';
+  const g = calcGrade(TB_GRIP, stu.gender, curGrade, parseFloat(avg));
+  const badge = document.getElementById('grip-grade-badge');
+  if (badge) { badge.textContent = gradeShort(g); badge.className = 'grade-badge ' + gradeClass(g); }
+  const res = document.getElementById('grip-result');
+  if (res) res.innerHTML = `우 최고 ${rBest||'—'}kg | 좌 최고 ${lBest||'—'}kg | 평균 ${avg||'—'}kg → ${gradeLabel(g)}`;
+}
+
+function onJumpInput() {
+  const stu = students[curStudentIdx];
+  const t1 = document.getElementById('jump-t1')?.value;
+  const t2 = document.getElementById('jump-t2')?.value;
+  stu.data.jump = { t1, t2 };
+  const best = Math.max(parseFloat(t1)||0, parseFloat(t2)||0) || '';
+  const g = calcGrade(TB_JUMP, stu.gender, curGrade, parseFloat(best));
+  const badge = document.getElementById('jump-grade-badge');
+  if (badge) { badge.textContent = gradeShort(g); badge.className = 'grade-badge ' + gradeClass(g); }
+  const res = document.getElementById('jump-result');
+  if (res) res.innerHTML = `채택: <strong>${best||'—'} cm</strong> → ${gradeLabel(g)}`;
+}
+
+function onFlexInput() {
+  const stu = students[curStudentIdx];
+  const t1 = document.getElementById('flex-t1')?.value;
+  const t2 = document.getElementById('flex-t2')?.value;
+  stu.data.flex = { t1, t2 };
+  const bestVal = (t1 !== '' || t2 !== '') ? Math.max(parseFloat(t1)||-999, parseFloat(t2)||-999) : '';
+  const g = bestVal !== '' ? calcGrade(TB_FLEX, stu.gender, curGrade, parseFloat(bestVal)) : '';
+  const badge = document.getElementById('flex-grade-badge');
+  if (badge) { badge.textContent = gradeShort(g); badge.className = 'grade-badge ' + gradeClass(g); }
+  const res = document.getElementById('flex-result');
+  if (res) res.innerHTML = `채택: <strong>${bestVal !== '' ? bestVal + ' cm' : '—'}</strong> → ${gradeLabel(g)}`;
+}
+
+function onBmiInput() {
+  const stu = students[curStudentIdx];
+  const h = document.getElementById('bmi-height')?.value;
+  const w = document.getElementById('bmi-weight')?.value;
+  stu.data.bmi = { height: h, weight: w };
+  const bmiVal = (h && w) ? (w / Math.pow(h / 100, 2)).toFixed(1) : '';
+  const cat = getBmiInfo(stu.gender, curGrade, bmiVal);
+  const res = document.getElementById('bmi-result');
+  if (res) res.innerHTML = bmiVal ? `BMI: <strong>${bmiVal}</strong> → <span style="color:${cat.color}">${cat.label}</span>` : '키와 몸무게를 입력하면 자동 계산됩니다';
+}
+
+function saveStudentName(val) { students[curStudentIdx].name = val; }
+function saveMemo(val) { students[curStudentIdx].memo = val; }
+function setGender(g) {
+  students[curStudentIdx].gender = g;
+  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector('.gender-btn.' + (g === '남' ? 'm' : 'f')).classList.add('selected');
+  renderEvents(); // re-render grades with new gender
+}
+
+function markAbsent() {
+  students[curStudentIdx].status = 'absent';
+  saveRecords();
+  nextStudent();
+}
+function markSkip() {
+  students[curStudentIdx].status = 'skip';
+  saveRecords();
+  nextStudent();
+}
+
+function prevStudent() {
+  collectCurrentData();
+  if (curStudentIdx > 0) { curStudentIdx--; renderStudent(); }
+}
+function nextStudent() {
+  collectCurrentData();
+  if (curStudentIdx < students.length - 1) { curStudentIdx++; renderStudent(); }
+}
+
+function collectCurrentData() {
+  // data is updated via oninput handlers, just ensure name/memo
+  const stu = students[curStudentIdx];
+  stu.name = document.getElementById('stu-name')?.value || stu.name;
+  stu.memo = document.getElementById('memo-input')?.value || stu.memo;
+}
+
+function saveAndNext() {
+  collectCurrentData();
+  const stu = students[curStudentIdx];
+  stu.status = 'done';
+  saveRecords();
+  // show complete screen
+  showComplete(stu);
+}
+
+function showComplete(stu) {
+  document.getElementById('complete-name-label').textContent = (stu.name || stu.num + '번') + ' 학생 기록 저장됨';
+  const grid = document.getElementById('result-grid');
+  grid.innerHTML = '';
+  activeEvents.forEach(ev => {
+    let val = '—', gLabel = '';
+    if (ev.id === 'run') {
+      val = stu.data.run ? stu.data.run + '회' : '—';
+      const g = calcGrade(TB_RUN, stu.gender, curGrade, parseInt(stu.data.run));
+      gLabel = gradeShort(g);
+    } else if (ev.id === 'grip') {
+      const d = stu.data.grip || {};
+      const r = Math.max(parseFloat(d.r1)||0, parseFloat(d.r2)||0);
+      const l = Math.max(parseFloat(d.l1)||0, parseFloat(d.l2)||0);
+      const avg = (r && l) ? ((r+l)/2).toFixed(1) : '';
+      val = avg ? avg + 'kg' : '—';
+      const g = calcGrade(TB_GRIP, stu.gender, curGrade, parseFloat(avg));
+      gLabel = gradeShort(g);
+    } else if (ev.id === 'jump') {
+      const d = stu.data.jump || {};
+      const best = Math.max(parseFloat(d.t1)||0, parseFloat(d.t2)||0) || '';
+      val = best ? best + 'cm' : '—';
+      const g = calcGrade(TB_JUMP, stu.gender, curGrade, parseFloat(best));
+      gLabel = gradeShort(g);
+    } else if (ev.id === 'flex') {
+      const d = stu.data.flex || {};
+      const bestVal = (d.t1 !== undefined && d.t1 !== '') ? Math.max(parseFloat(d.t1)||-999, parseFloat(d.t2)||-999) : '';
+      val = bestVal !== '' ? bestVal + 'cm' : '—';
+      const g = bestVal !== '' ? calcGrade(TB_FLEX, stu.gender, curGrade, parseFloat(bestVal)) : '';
+      gLabel = gradeShort(g);
+    } else if (ev.id === 'bmi') {
+      const d = stu.data.bmi || {};
+      const bmiVal = (d.height && d.weight) ? (d.weight / Math.pow(d.height/100,2)).toFixed(1) : '';
+      val = bmiVal ? 'BMI ' + bmiVal : '—';
+      const cat = getBmiInfo(stu.gender, curGrade, bmiVal);
+      gLabel = cat.label || '';
+    }
+    grid.innerHTML += `<div class="result-item">
+      <div class="result-label">${ev.icon} ${ev.name}</div>
+      <div class="result-value">${val}</div>
+      ${gLabel ? '<div class="result-grade" style="color:var(--blue)">' + gLabel + '</div>' : ''}
+    </div>`;
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-complete').classList.add('active');
+}
+
+function goMeasure() {
+  if (curStudentIdx < students.length - 1) { curStudentIdx++; }
+  goPage('measure');
+  renderStudent();
+}
+
+function showDash() {
+  goPage('dash');
+}
+
+// ═══════════════ SAVE / LOAD ═══════════════
+function saveRecords() {
+  const key = curGrade + '-' + curClass;
+  if (key === '-') return;
+  allRecords[key] = students;
+  localStorage.setItem('paps_records', JSON.stringify(allRecords));
+}
+
+// ═══════════════ DASHBOARD ═══════════════
+// 학년 필터 변경 시 반 목록 업데이트
+function dashFilterChange() {
+  const grade = document.getElementById('dash-filter-grade').value;
+  const clsSel = document.getElementById('dash-filter-class');
+  clsSel.innerHTML = '<option value="">전체 반</option>';
+  if (grade) {
+    const cnt = CLASS_COUNT[grade] || 4;
+    for (let i = 1; i <= cnt; i++) {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = i + '반';
+      clsSel.appendChild(opt);
+    }
+  }
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const tbody = document.getElementById('dash-tbody');
+  tbody.innerHTML = '';
+  let total = 0, done = 0, absent = 0;
+
+  const fg = document.getElementById('dash-filter-grade')?.value || '';
+  const fc = document.getElementById('dash-filter-class')?.value || '';
+
+  Object.keys(allRecords).sort().forEach(key => {
+    const [g, c] = key.split('-');
+    if (fg && g !== fg) return;
+    if (fc && c !== fc) return;
+    const arr = allRecords[key];
+    arr.forEach((stu, idx) => {
+      total++;
+      if (stu.status === 'done') done++;
+      else if (stu.status === 'absent') absent++;
+
+      const run = stu.data.run || '—';
+      const d_g = stu.data.grip || {};
+      const rB = Math.max(parseFloat(d_g.r1)||0, parseFloat(d_g.r2)||0);
+      const lB = Math.max(parseFloat(d_g.l1)||0, parseFloat(d_g.l2)||0);
+      const gripAvg = (rB && lB) ? ((rB+lB)/2).toFixed(1) : '—';
+      const d_j = stu.data.jump || {};
+      const jumpBest = Math.max(parseFloat(d_j.t1)||0, parseFloat(d_j.t2)||0) || '—';
+      const d_f = stu.data.flex || {};
+      const flexBest = (d_f.t1 !== undefined && d_f.t1 !== '') ? Math.max(parseFloat(d_f.t1)||-999, parseFloat(d_f.t2)||-999) : '—';
+      const d_b = stu.data.bmi || {};
+      const heightVal = d_b.height || '—';
+      const weightVal = d_b.weight || '—';
+      const bmiVal = (d_b.height && d_b.weight) ? (d_b.weight / Math.pow(d_b.height/100,2)).toFixed(1) : '—';
+      const cat = getBmiInfo(stu.gender, g, bmiVal);
+      const statusMap = {
+        done:   '<span class="status-dot status-done"></span>완료',
+        absent: '<span class="status-dot status-absent"></span>결석',
+        skip:   '<span class="status-dot status-partial"></span>건너뜀',
+        none:   '<span class="status-dot status-none"></span>미입력'
+      };
+
+      // 관리자: 인라인 편집 가능한 행, 일반: 읽기 전용
+      if (isAdmin) {
+        tbody.innerHTML += `<tr style="background:#fffde7">
+          <td><b>${g}-${c}-${stu.num}</b></td>
+          <td><input value="${stu.name||''}" style="width:68px;border:1px solid #ffd54f;border-radius:4px;padding:2px 4px;font-size:12px" onchange="editField('${key}',${idx},'name',this.value)"></td>
+          <td>
+            <select style="font-size:12px;border:1px solid #ffd54f;border-radius:4px;padding:2px" onchange="editField('${key}',${idx},'gender',this.value)">
+              <option value="" ${!stu.gender?'selected':''}>—</option>
+              <option value="남" ${stu.gender==='남'?'selected':''}>남</option>
+              <option value="여" ${stu.gender==='여'?'selected':''}>여</option>
+            </select>
+          </td>
+          <td><input type="number" value="${stu.data.run||''}" style="width:44px;border:1px solid #ffd54f;border-radius:4px;padding:2px 4px;font-size:12px" onchange="editData('${key}',${idx},'run',this.value)"></td>
+          <td style="font-size:12px">${gripAvg}</td>
+          <td style="font-size:12px">${jumpBest}</td>
+          <td style="font-size:12px">${flexBest}</td>
+          <td><input type="number" value="${d_b.height||''}" style="width:44px;border:1px solid #ffd54f;border-radius:4px;padding:2px 4px;font-size:12px" onchange="editBmi('${key}',${idx},'height',this.value)"></td>
+          <td><input type="number" value="${d_b.weight||''}" style="width:44px;border:1px solid #ffd54f;border-radius:4px;padding:2px 4px;font-size:12px" onchange="editBmi('${key}',${idx},'weight',this.value)"></td>
+          <td style="font-size:12px">${bmiVal !== '—' ? bmiVal + ' (' + cat.label + ')' : '—'}</td>
+          <td>
+            <select style="font-size:11px;border:1px solid #ffd54f;border-radius:4px;padding:2px" onchange="editField('${key}',${idx},'status',this.value)">
+              <option value="none" ${stu.status==='none'?'selected':''}>미입력</option>
+              <option value="done" ${stu.status==='done'?'selected':''}>완료</option>
+              <option value="absent" ${stu.status==='absent'?'selected':''}>결석</option>
+              <option value="skip" ${stu.status==='skip'?'selected':''}>건너뜀</option>
+            </select>
+          </td>
+        </tr>`;
+      } else {
+        tbody.innerHTML += `<tr>
+          <td><b>${g}-${c}-${stu.num}</b></td>
+          <td>${stu.name || '—'}</td>
+          <td>${stu.gender || '—'}</td>
+          <td>${run}</td>
+          <td>${gripAvg}</td>
+          <td>${jumpBest}</td>
+          <td>${flexBest}</td>
+          <td>${heightVal}</td>
+          <td>${weightVal}</td>
+          <td>${bmiVal !== '—' ? bmiVal + ' (' + cat.label + ')' : '—'}</td>
+          <td>${statusMap[stu.status] || '—'}</td>
+        </tr>`;
+      }
+    });
+  });
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-absent').textContent = absent + (total - done - absent > 0 ? '+' + (total - done - absent) : '');
+
+  if (total === 0) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px">측정 기록 없음</td></tr>';
+  }
+}
+
+// 관리자 인라인 편집
+function editField(key, idx, field, val) {
+  if (!allRecords[key] || !allRecords[key][idx]) return;
+  allRecords[key][idx][field] = val;
+  localStorage.setItem('paps_records', JSON.stringify(allRecords));
+}
+function editData(key, idx, field, val) {
+  if (!allRecords[key] || !allRecords[key][idx]) return;
+  allRecords[key][idx].data[field] = val;
+  localStorage.setItem('paps_records', JSON.stringify(allRecords));
+}
+function editBmi(key, idx, field, val) {
+  if (!allRecords[key] || !allRecords[key][idx]) return;
+  if (!allRecords[key][idx].data.bmi) allRecords[key][idx].data.bmi = {};
+  allRecords[key][idx].data.bmi[field] = val;
+  localStorage.setItem('paps_records', JSON.stringify(allRecords));
+  // BMI 재계산 후 행 새로고침
+  renderDashboard();
+}
+
+// ═══════════════ 엑셀 다운로드 ═══════════════
+function exportExcel() {
+  if (!isAdmin) { alert('관리자 인증 후 다운로드 가능합니다.'); return; }
+
+  const fg = document.getElementById('dash-filter-grade')?.value || '';
+  const fc = document.getElementById('dash-filter-class')?.value || '';
+
+  // CSV (UTF-8 BOM) 형식으로 .xlsx 대신 .csv 다운로드 (Excel에서 바로 열림)
+  let csv = '\uFEFF학년,반,번호,이름,성별,왕복오래달리기(회),왕복등급,악력평균(kg),악력등급,제자리멀리뛰기(cm),멀리뛰기등급,유연성(cm),유연성등급,키(cm),몸무게(kg),BMI,BMI판정,상태\n';
+
+  Object.keys(allRecords).sort().forEach(key => {
+    const [g, c] = key.split('-');
+    if (fg && g !== fg) return;
+    if (fc && c !== fc) return;
+    allRecords[key].forEach(stu => {
+      const run = stu.data.run || '';
+      const runG = run ? gradeShort(calcGrade(TB_RUN, stu.gender, g, parseInt(run))) : '';
+      const dg = stu.data.grip || {};
+      const rB = Math.max(parseFloat(dg.r1)||0, parseFloat(dg.r2)||0);
+      const lB = Math.max(parseFloat(dg.l1)||0, parseFloat(dg.l2)||0);
+      const gripAvg = (rB && lB) ? ((rB+lB)/2).toFixed(1) : '';
+      const gripG = gripAvg ? gradeShort(calcGrade(TB_GRIP, stu.gender, g, parseFloat(gripAvg))) : '';
+      const dj = stu.data.jump || {};
+      const jb = Math.max(parseFloat(dj.t1)||0, parseFloat(dj.t2)||0) || '';
+      const jumpG = jb ? gradeShort(calcGrade(TB_JUMP, stu.gender, g, parseFloat(jb))) : '';
+      const df = stu.data.flex || {};
+      const fb = (df.t1 !== undefined && df.t1 !== '') ? Math.max(parseFloat(df.t1)||-999, parseFloat(df.t2)||-999) : '';
+      const flexG = fb !== '' ? gradeShort(calcGrade(TB_FLEX, stu.gender, g, parseFloat(fb))) : '';
+      const db = stu.data.bmi || {};
+      const h = db.height || ''; const w = db.weight || '';
+      const bmiVal = (h && w) ? (w / Math.pow(h/100, 2)).toFixed(1) : '';
+      const cat = getBmiInfo(stu.gender, g, bmiVal);
+      csv += `${g},${c},${stu.num},"${stu.name||''}",${stu.gender||''},${run},${runG},${gripAvg},${gripG},${jb||''},${jumpG},${fb!==''?fb:''},${flexG},${h},${w},${bmiVal},"${bmiVal?cat.label:''}",${stu.status||''}\n`;
+    });
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const filterLabel = fg ? fg+'학년'+(fc?fc+'반':'') : '전체';
+  a.href = url;
+  a.download = '체력측정_'+filterLabel+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════ RESET ═══════════════
+function confirmReset() { document.getElementById('reset-modal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function doReset() {
+  allRecords = {};
+  localStorage.removeItem('paps_records');
+  students = [];
+  closeModal('reset-modal');
+  renderDashboard();
+  alert('✅ 모든 기록이 초기화되었습니다.');
+}
+
+// ═══════════════ INIT ═══════════════
+window.addEventListener('DOMContentLoaded', () => {
+  buildEventList();
+});
+</script>
+</body>
+</html>
