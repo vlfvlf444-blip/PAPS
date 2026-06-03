@@ -454,7 +454,7 @@
     <div class="event-list" id="event-list"></div>
   </div>
 
-  <button class="btn btn-primary" onclick="startMeasure()">이 반 측정 시작 →</button>
+  <button class="btn btn-primary" id="btn-start-measure" onclick="startMeasure()">이 반 측정 시작 →</button>
 </div>
 
 <!-- ═══════════════ MEASURE PAGE ═══════════════ -->
@@ -875,16 +875,27 @@ function adminLogout() {
   if (toggleBtn) { toggleBtn.textContent = '🛡️ 관리자'; toggleBtn.style.color = ''; toggleBtn.style.borderColor = ''; }
   renderDashboard();
 }
+// ═══════════════ TOAST (모바일 alert 대체) ═══════════════
+function showToast(msg, duration) {
+  var existing = document.getElementById('toast-msg');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.id = 'toast-msg';
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(15,41,66,0.92);color:white;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:9999;max-width:80%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);font-family:inherit;pointer-events:none';
+  document.body.appendChild(t);
+  setTimeout(function() { if (t.parentNode) t.remove(); }, duration || 2500);
+}
+
 function changePin() {
   const cur = document.getElementById('cur-pin').value;
   const n1 = document.getElementById('new-pin').value;
   const n2 = document.getElementById('new-pin2').value;
-  if (cur !== adminPin) { alert('현재 PIN이 올바르지 않습니다.'); return; }
-  if (!/^\d{4,8}$/.test(n1)) { alert('새 PIN은 4~8자리 숫자여야 합니다.'); return; }
-  if (n1 !== n2) { alert('새 PIN이 일치하지 않습니다.'); return; }
-  adminPin = n1;
-  localStorage.setItem('paps_pin', n1);
-  alert('✅ PIN이 변경되었습니다.');
+  if (cur !== adminPin) { showToast('현재 PIN이 올바르지 않습니다.'); return; }
+  if (!/^\d{4,8}$/.test(n1)) { showToast('새 PIN은 4~8자리 숫자여야 합니다.'); return; }
+  if (n1 !== n2) { showToast('새 PIN이 일치하지 않습니다.'); return; }
+  adminPin = n1; localStorage.setItem('paps_pin', n1);
+  showToast('✅ PIN이 변경되었습니다.');
   document.getElementById('cur-pin').value = '';
   document.getElementById('new-pin').value = '';
   document.getElementById('new-pin2').value = '';
@@ -1190,6 +1201,12 @@ function buildClassGrid() {
       this.classList.add('selected');
       curClass = this.dataset.class;
     };
+    ch.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.class-chip').forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+      curClass = this.dataset.class;
+    }, { passive: false });
     grid.appendChild(ch);
   }
   curClass = '';
@@ -1221,35 +1238,41 @@ function buildEventList() {
 
 function startMeasure() {
   curGrade = document.getElementById('sel-grade').value;
-  if (!curGrade) { alert('학년을 선택하세요.'); return; }
-  if (!curClass) { alert('반을 선택하세요.'); return; }
+  if (!curGrade) { showToast('학년을 선택하세요.'); return; }
+
+  // 선택된 칩에서 curClass 읽기
+  const selectedChip = document.querySelector('.class-chip.selected');
+  if (selectedChip) curClass = selectedChip.dataset.class;
+  if (!curClass) { showToast('반을 선택하세요.'); return; }
 
   activeEvents = [];
-  document.querySelectorAll('.event-toggle.on').forEach(el => {
-    const ev = EVENTS.find(e => e.id === el.dataset.id);
+  document.querySelectorAll('.event-toggle.on').forEach(function(el) {
+    var ev = EVENTS.find(function(e) { return e.id === el.dataset.id; });
     if (ev) activeEvents.push(ev);
   });
-  if (activeEvents.length === 0) { alert('최소 1개 종목을 선택하세요.'); return; }
+  if (activeEvents.length === 0) { showToast('최소 1개 종목을 선택하세요.'); return; }
 
   // Load or init roster
-  const key = curGrade + '-' + curClass;
+  var key = curGrade + '-' + curClass;
   if (allRecords[key]) {
-    // 기존 기록이 있으면 이름이 빈 경우 내장 명단으로 채움
-    students = allRecords[key].map(s => ({
-      ...s,
-      name: s.name || getBuiltinName(curGrade, curClass, s.num)
-    }));
+    students = allRecords[key].map(function(s) {
+      return {
+        num: s.num, name: s.name || getBuiltinName(curGrade, curClass, s.num),
+        gender: s.gender || '', data: s.data || {}, status: s.status || 'none', memo: s.memo || ''
+      };
+    });
   } else {
-    // 내장 명단 우선, 없으면 localStorage 로스터, 그것도 없으면 기본 30명
-    const builtin = BUILTIN_ROSTER[key];
-    const savedRoster = localStorage.getItem('paps_roster_' + key);
+    var builtin = BUILTIN_ROSTER[key];
+    var savedRoster = localStorage.getItem('paps_roster_' + key);
     if (builtin) {
-      students = builtin.map(s => ({ num: s.num, name: s.name, gender: '', data: {}, status: 'none', memo: '' }));
+      students = builtin.map(function(s) {
+        return { num: s.num, name: s.name, gender: '', data: {}, status: 'none', memo: '' };
+      });
     } else if (savedRoster) {
-      students = JSON.parse(savedRoster);
+      try { students = JSON.parse(savedRoster); } catch(e) { students = []; }
     } else {
       students = [];
-      for (let i = 1; i <= 30; i++) {
+      for (var i = 1; i <= 30; i++) {
         students.push({ num: i, name: '', gender: '', data: {}, status: 'none', memo: '' });
       }
     }
@@ -1782,7 +1805,7 @@ function editBmi(key, idx, field, val) {
 
 // ═══════════════ 엑셀 다운로드 ═══════════════
 function exportExcel() {
-  if (!isAdmin) { alert('관리자 인증 후 다운로드 가능합니다.'); return; }
+  if (!isAdmin) { showToast('관리자 인증 후 다운로드 가능합니다.'); return; }
 
   const fg = document.getElementById('dash-filter-grade')?.value || '';
   const fc = document.getElementById('dash-filter-class')?.value || '';
@@ -1835,7 +1858,7 @@ function doReset() {
   students = [];
   closeModal('reset-modal');
   renderDashboard();
-  alert('✅ 모든 기록이 초기화되었습니다.');
+  showToast('✅ 모든 기록이 초기화되었습니다.');
 }
 
 // ═══════════════ INIT ═══════════════
