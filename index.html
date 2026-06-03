@@ -1354,8 +1354,7 @@ function renderEvents() {
           <label>완료 횟수 (회)</label>
           <input type="number" id="inp-run" value="${val}" placeholder="횟수 입력" min="0" oninput="onRunInput(this.value)">
         </div>
-        <div class="auto-result" id="run-result">${val ? '입력: <strong>'+val+'회</strong> → '+gradeLabel(g) : '횟수를 입력하면 자동 계산됩니다'}</div>
-        <div class="grade-info-box">중1남: 64회↑(1등급) · 중2남: 66회↑(1등급) · 중3남: 68회↑(1등급)<br>중1여: 35회↑(1등급) · 중2여: 40회↑(1등급) · 중3여: 45회↑(1등급)</div>`;
+        <div class="auto-result" id="run-result">${val ? '입력: <strong>'+val+'회</strong> → '+gradeLabel(g) : '횟수를 입력하면 자동 계산됩니다'}</div>`;
 
     } else if (ev.id === 'grip') {
       const d = stu.data.grip || {};
