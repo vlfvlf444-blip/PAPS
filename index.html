@@ -150,13 +150,13 @@
   /* ─── CLASS SELECTOR ─── */
   .class-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .class-chip {
-    background: var(--bg); border: 1.5px solid var(--border);
-    border-radius: 9px; padding: 10px 4px; text-align: center;
-    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.18s;
-    color: var(--muted);
+    background: var(--bg); border: 2px solid var(--border);
+    border-radius: 9px; padding: 14px 4px; text-align: center;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.18s;
+    color: var(--muted); user-select: none; -webkit-user-select: none;
+    min-height: 50px; display: flex; align-items: center; justify-content: center;
   }
   .class-chip.selected { background: var(--blue); color: white; border-color: var(--blue); box-shadow: 0 3px 8px rgba(20,100,165,0.3); }
-  .class-chip:hover:not(.selected) { border-color: var(--sky); color: var(--sky); }
 
   /* ─── EVENT TOGGLES ─── */
   .event-list { display: flex; flex-direction: column; gap: 8px; }
@@ -454,7 +454,7 @@
     <div class="event-list" id="event-list"></div>
   </div>
 
-  <button class="btn btn-primary" id="btn-start-measure" onclick="startMeasure()">이 반 측정 시작 →</button>
+  <button class="btn btn-primary" id="btn-start-measure" onclick="startMeasure()" style="padding:16px;font-size:16px;margin-top:8px">이 반 측정 시작 →</button>
 </div>
 
 <!-- ═══════════════ MEASURE PAGE ═══════════════ -->
@@ -1186,30 +1186,27 @@ function getBuiltinName(grade, cls, num) {
 
 // ═══════════════ HOME SETUP ═══════════════
 function buildClassGrid() {
-  const grade = document.getElementById('sel-grade').value;
-  const grid = document.getElementById('class-grid');
+  var grade = document.getElementById('sel-grade').value;
+  var grid = document.getElementById('class-grid');
   grid.innerHTML = '';
-  if (!grade) return;
-  const cnt = CLASS_COUNT[grade] || 4;
-  for (let i = 1; i <= cnt; i++) {
-    const ch = document.createElement('div');
-    ch.className = 'class-chip';
-    ch.textContent = i + '반';
-    ch.dataset.class = i;
-    ch.onclick = function() {
-      document.querySelectorAll('.class-chip').forEach(c => c.classList.remove('selected'));
-      this.classList.add('selected');
-      curClass = this.dataset.class;
-    };
-    ch.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      document.querySelectorAll('.class-chip').forEach(c => c.classList.remove('selected'));
-      this.classList.add('selected');
-      curClass = this.dataset.class;
-    }, { passive: false });
-    grid.appendChild(ch);
-  }
   curClass = '';
+  if (!grade) return;
+  var cnt = CLASS_COUNT[grade] || 4;
+  for (var i = 1; i <= cnt; i++) {
+    (function(num) {
+      var ch = document.createElement('div');
+      ch.className = 'class-chip';
+      ch.textContent = num + '반';
+      ch.dataset.class = String(num);
+      ch.onclick = function() {
+        var chips = document.querySelectorAll('.class-chip');
+        for (var j = 0; j < chips.length; j++) chips[j].classList.remove('selected');
+        ch.classList.add('selected');
+        curClass = String(num);
+      };
+      grid.appendChild(ch);
+    })(i);
+  }
 }
 
 function buildEventList() {
