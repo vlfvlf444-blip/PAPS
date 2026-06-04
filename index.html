@@ -418,16 +418,16 @@
     <div class="title">학생건강체력평가</div>
   </div>
   <div class="header-right">
-    <button class="hdr-btn" onclick="openAdminPin()" id="admin-btn">🛡️ 관리자</button>
+    <button class="hdr-btn" id="admin-btn">🛡️ 관리자</button>
   </div>
 </header>
 
 <!-- ═══════════════ TOP NAV ═══════════════ -->
 <nav class="top-nav">
-  <button class="tnav-item active" id="bnav-home"    onclick="goPage('home')"   ><span class="icon">🏠</span>홈</button>
-  <button class="tnav-item"        id="bnav-measure" onclick="goPage('measure')"><span class="icon">📏</span>측정</button>
-  <button class="tnav-item"        id="bnav-dash"    onclick="goPage('dash')"   ><span class="icon">📊</span>현황판</button>
-  <button class="tnav-item"        id="bnav-grade"   onclick="goPage('grade')"  ><span class="icon">🏅</span>전체등급</button>
+  <button class="tnav-item active" id="bnav-home"   ><span class="icon">🏠</span>홈</button>
+  <button class="tnav-item"        id="bnav-measure" ><span class="icon">📏</span>측정</button>
+  <button class="tnav-item"        id="bnav-dash"    ><span class="icon">📊</span>현황판</button>
+  <button class="tnav-item"        id="bnav-grade"   ><span class="icon">🏅</span>전체등급</button>
 </nav>
 <div class="page active fade-in" id="page-home">
   <div class="hero-banner">
@@ -455,7 +455,7 @@
     <div class="event-list" id="event-list"></div>
   </div>
 
-  <button class="btn btn-primary" id="btn-start-measure" onclick="startMeasure()" style="padding:16px;font-size:16px;margin-top:8px">이 반 측정 시작 →</button>
+  <button class="btn btn-primary" id="btn-start-measure" style="padding:16px;font-size:16px;margin-top:8px">이 반 측정 시작 →</button>
 </div>
 
 <!-- ═══════════════ MEASURE PAGE ═══════════════ -->
@@ -466,8 +466,8 @@
       <div class="progress-text" id="nav-progress">0 / 0명 완료</div>
     </div>
     <div class="nav-arrows">
-      <button class="nav-arrow" onclick="prevStudent()" id="btn-prev">◀ 이전</button>
-      <button class="nav-arrow" onclick="nextStudent()" id="btn-next">다음 ▶</button>
+      <button class="nav-arrow" id="btn-prev">◀ 이전</button>
+      <button class="nav-arrow" id="btn-next">다음 ▶</button>
     </div>
   </div>
 
@@ -475,18 +475,13 @@
     <div class="prog-fill" id="progress-bar" style="width:0%"></div>
   </div>
 
-  <div class="quick-actions">
-    <button class="q-btn absent" onclick="markAbsent()">🚫 결석 처리</button>
-    <button class="q-btn skip" onclick="markSkip()">↩ 건너뜀</button>
-  </div>
-
   <div class="student-header">
     <div class="student-num" id="stu-num">1</div>
     <div class="student-info">
       <input class="student-name-input" id="stu-name" placeholder="이름 입력" oninput="saveStudentName(this.value)">
       <div class="gender-row">
-        <button class="gender-btn m" onclick="setGender('남')">♂ 남</button>
-        <button class="gender-btn f" onclick="setGender('여')">♀ 여</button>
+        <button class="gender-btn m" id="btn-gender-m">♂ 남</button>
+        <button class="gender-btn f" id="btn-gender-f">♀ 여</button>
       </div>
     </div>
   </div>
@@ -498,7 +493,7 @@
     <textarea id="memo-input" placeholder="특이사항 입력..." oninput="saveMemo(this.value)" style="margin-bottom:0"></textarea>
   </div>
 
-  <button class="btn btn-success" onclick="saveAndNext()" style="margin-top:4px">저장 후 다음 →</button>
+  <button class="btn btn-success" id="btn-save-next" style="margin-top:4px">저장 후 다음 →</button>
 </div>
 
 <!-- ═══════════════ DASHBOARD PAGE ═══════════════ -->
@@ -1906,6 +1901,33 @@ window.addEventListener('DOMContentLoaded', function() {
   for (var i = 0; i < pages.length; i++) pages[i].style.display = 'none';
   var home = document.getElementById('page-home');
   if (home) { home.style.display = 'block'; home.classList.add('active'); }
+
+  // ── 버튼 이벤트 등록 (onclick 속성 대신 addEventListener — 모바일 호환) ──
+  function bindClick(id, fn) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', fn);
+    el.addEventListener('touchend', function(e) { e.preventDefault(); fn(); }, { passive: false });
+  }
+
+  // 홈
+  bindClick('btn-start-measure', startMeasure);
+
+  // 측정
+  bindClick('btn-prev',      prevStudent);
+  bindClick('btn-next',      nextStudent);
+  bindClick('btn-save-next', saveAndNext);
+  bindClick('btn-gender-m',  function() { setGender('남'); });
+  bindClick('btn-gender-f',  function() { setGender('여'); });
+
+  // 탭 네비게이션
+  bindClick('bnav-home',    function() { goPage('home'); });
+  bindClick('bnav-measure', function() { goPage('measure'); });
+  bindClick('bnav-dash',    function() { goPage('dash'); });
+  bindClick('bnav-grade',   function() { goPage('grade'); });
+
+  // 관리자 버튼 (헤더)
+  bindClick('admin-btn', function() { openAdminPin(); });
 
   // 관리자 세션 복원 (새로고침 후에도 유지)
   if (sessionStorage.getItem('paps_admin') === '1') {
