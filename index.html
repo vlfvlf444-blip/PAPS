@@ -92,6 +92,7 @@
     display: block; width: 100%; padding: 13px; border: none; border-radius: 10px;
     font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.18s;
     font-family: inherit; letter-spacing: 0.3px;
+    touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);
   }
   .btn-primary { background: linear-gradient(135deg, var(--blue), var(--sky)); color: white; box-shadow: 0 4px 12px rgba(20,100,165,0.35); }
   .btn-primary:active { transform: scale(0.98); }
@@ -336,6 +337,7 @@
     padding: 8px 2px 6px; cursor: pointer; transition: all 0.18s; border: none; background: none;
     font-family: inherit; color: var(--muted); font-size: 10px; font-weight: 600; gap: 2px;
     border-bottom: 3px solid transparent;
+    touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0.1);
   }
   .tnav-item .icon { font-size: 18px; }
   .tnav-item.active { color: var(--blue); border-bottom-color: var(--blue); background: #f0f7ff; }
@@ -1838,44 +1840,50 @@ function editBmi(key, idx, field, val) {
 function exportExcel() {
   if (!isAdmin) { showToast('관리자 인증 후 다운로드 가능합니다.'); return; }
 
-  const fg = document.getElementById('dash-filter-grade')?.value || '';
-  const fc = document.getElementById('dash-filter-class')?.value || '';
+  var fg = document.getElementById('dash-filter-grade') ? document.getElementById('dash-filter-grade').value : '';
+  var fc = document.getElementById('dash-filter-class') ? document.getElementById('dash-filter-class').value : '';
 
-  // CSV (UTF-8 BOM) 형식으로 .xlsx 대신 .csv 다운로드 (Excel에서 바로 열림)
-  let csv = '\uFEFF학년,반,번호,이름,성별,왕복오래달리기(회),왕복등급,악력평균(kg),악력등급,제자리멀리뛰기(cm),멀리뛰기등급,유연성(cm),유연성등급,키(cm),몸무게(kg),BMI,BMI판정,상태\n';
+  // 첫 행: 항목명
+  var csv = '\uFEFF학년,반,번호,학생성명,왕복오래달리기(회),유연성1차(cm),유연성2차(cm),악력1차(오른)(kg),악력1차(왼)(kg),악력2차(오른)(kg),악력2차(왼)(kg),제자리멀리뛰기1차(cm),제자리멀리뛰기2차(cm),신장(cm),체중(kg)\n';
 
-  Object.keys(allRecords).sort().forEach(key => {
-    const [g, c] = key.split('-');
-    if (fg && g !== fg) return;
-    if (fc && c !== fc) return;
-    allRecords[key].forEach(stu => {
-      const run = stu.data.run || '';
-      const runG = run ? gradeShort(calcGrade(TB_RUN, stu.gender, g, parseInt(run))) : '';
-      const dg = stu.data.grip || {};
-      const rB = Math.max(parseFloat(dg.r1)||0, parseFloat(dg.r2)||0);
-      const lB = Math.max(parseFloat(dg.l1)||0, parseFloat(dg.l2)||0);
-      const gripAvg = (rB && lB) ? ((rB+lB)/2).toFixed(1) : '';
-      const gripG = gripAvg ? gradeShort(calcGrade(TB_GRIP, stu.gender, g, parseFloat(gripAvg))) : '';
-      const dj = stu.data.jump || {};
-      const jb = Math.max(parseFloat(dj.t1)||0, parseFloat(dj.t2)||0) || '';
-      const jumpG = jb ? gradeShort(calcGrade(TB_JUMP, stu.gender, g, parseFloat(jb))) : '';
-      const df = stu.data.flex || {};
-      const fb = (df.t1 !== undefined && df.t1 !== '') ? Math.max(parseFloat(df.t1)||-999, parseFloat(df.t2)||-999) : '';
-      const flexG = fb !== '' ? gradeShort(calcGrade(TB_FLEX, stu.gender, g, parseFloat(fb))) : '';
-      const db = stu.data.bmi || {};
-      const h = db.height || ''; const w = db.weight || '';
-      const bmiVal = (h && w) ? (w / Math.pow(h/100, 2)).toFixed(1) : '';
-      const cat = getBmiInfo(stu.gender, g, bmiVal);
-      csv += `${g},${c},${stu.num},"${stu.name||''}",${stu.gender||''},${run},${runG},${gripAvg},${gripG},${jb||''},${jumpG},${fb!==''?fb:''},${flexG},${h},${w},${bmiVal},"${bmiVal?cat.label:''}",${stu.status||''}\n`;
-    });
-  });
+  var keys = Object.keys(allRecords).sort();
+  for (var ki = 0; ki < keys.length; ki++) {
+    var key   = keys[ki];
+    var parts = key.split('-');
+    var g = parts[0], c = parts[1];
+    if (fg && g !== fg) continue;
+    if (fc && c !== fc) continue;
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const filterLabel = fg ? fg+'학년'+(fc?fc+'반':'') : '전체';
-  a.href = url;
-  a.download = '체력측정_'+filterLabel+'_'+new Date().toISOString().slice(0,10)+'.csv';
+    var arr = allRecords[key];
+    for (var si = 0; si < arr.length; si++) {
+      var stu  = arr[si];
+      var df   = stu.data.flex || {};
+      var dg   = stu.data.grip || {};
+      var dj   = stu.data.jump || {};
+      var db   = stu.data.bmi  || {};
+      var name = (stu.name || '').replace(/"/g, '""');
+      csv +=
+        g + ',' + c + ',' + stu.num + ',"' + name + '",' +
+        (stu.data.run || '') + ',' +
+        (df.t1 !== undefined ? df.t1 : '') + ',' +
+        (df.t2 !== undefined ? df.t2 : '') + ',' +
+        (dg.r1 !== undefined ? dg.r1 : '') + ',' +
+        (dg.l1 !== undefined ? dg.l1 : '') + ',' +
+        (dg.r2 !== undefined ? dg.r2 : '') + ',' +
+        (dg.l2 !== undefined ? dg.l2 : '') + ',' +
+        (dj.t1 !== undefined ? dj.t1 : '') + ',' +
+        (dj.t2 !== undefined ? dj.t2 : '') + ',' +
+        (db.height || '') + ',' +
+        (db.weight || '') + '\n';
+    }
+  }
+
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  var filterLabel = fg ? fg + '학년' + (fc ? fc + '반' : '') : '전체';
+  a.href     = url;
+  a.download = '체력측정_' + filterLabel + '_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1896,44 +1904,47 @@ function doReset() {
 window.addEventListener('DOMContentLoaded', function() {
   buildEventList();
 
-  // 모든 페이지 display:none 초기화 후 홈만 표시
+  // 모든 페이지 숨기고 홈만 표시
   var pages = document.querySelectorAll('.page');
   for (var i = 0; i < pages.length; i++) pages[i].style.display = 'none';
   var home = document.getElementById('page-home');
   if (home) { home.style.display = 'block'; home.classList.add('active'); }
 
-  // ── 버튼 이벤트 등록 (onclick 속성 대신 addEventListener — 모바일 호환) ──
-  function bindClick(id, fn) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('click', fn);
-    el.addEventListener('touchend', function(e) { e.preventDefault(); fn(); }, { passive: false });
-  }
+  // 버튼에 onclick 직접 연결 (가장 단순하고 모바일 호환성 최고)
+  var btnStart = document.getElementById('btn-start-measure');
+  if (btnStart) btnStart.onclick = startMeasure;
 
-  // 홈
-  bindClick('btn-start-measure', startMeasure);
+  var btnPrev = document.getElementById('btn-prev');
+  if (btnPrev) btnPrev.onclick = prevStudent;
 
-  // 측정
-  bindClick('btn-prev',      prevStudent);
-  bindClick('btn-next',      nextStudent);
-  bindClick('btn-save-next', saveAndNext);
-  bindClick('btn-gender-m',  function() { setGender('남'); });
-  bindClick('btn-gender-f',  function() { setGender('여'); });
+  var btnNext = document.getElementById('btn-next');
+  if (btnNext) btnNext.onclick = nextStudent;
 
-  // 탭 네비게이션
-  bindClick('bnav-home',    function() { goPage('home'); });
-  bindClick('bnav-measure', function() { goPage('measure'); });
-  bindClick('bnav-dash',    function() { goPage('dash'); });
-  bindClick('bnav-grade',   function() { goPage('grade'); });
+  var btnSave = document.getElementById('btn-save-next');
+  if (btnSave) btnSave.onclick = saveAndNext;
 
-  // 관리자 버튼 (헤더)
-  bindClick('admin-btn', function() { openAdminPin(); });
+  var btnM = document.getElementById('btn-gender-m');
+  if (btnM) btnM.onclick = function() { setGender('남'); };
 
-  // 관리자 세션 복원 (새로고침 후에도 유지)
+  var btnF = document.getElementById('btn-gender-f');
+  if (btnF) btnF.onclick = function() { setGender('여'); };
+
+  var btnHome    = document.getElementById('bnav-home');
+  if (btnHome)    btnHome.onclick    = function() { goPage('home'); };
+  var btnMeasure = document.getElementById('bnav-measure');
+  if (btnMeasure) btnMeasure.onclick = function() { goPage('measure'); };
+  var btnDash    = document.getElementById('bnav-dash');
+  if (btnDash)    btnDash.onclick    = function() { goPage('dash'); };
+  var btnGrade   = document.getElementById('bnav-grade');
+  if (btnGrade)   btnGrade.onclick   = function() { goPage('grade'); };
+
+  var btnAdmin = document.getElementById('admin-btn');
+  if (btnAdmin) btnAdmin.onclick = openAdminPin;
+
+  // 관리자 세션 복원
   if (sessionStorage.getItem('paps_admin') === '1') {
     isAdmin = true;
-    var adminBtn = document.getElementById('admin-btn');
-    if (adminBtn) { adminBtn.classList.add('active'); adminBtn.textContent = '✅ 관리자'; }
+    if (btnAdmin) { btnAdmin.classList.add('active'); btnAdmin.textContent = '✅ 관리자'; }
     var adminBar = document.getElementById('admin-action-bar');
     if (adminBar) adminBar.style.display = 'block';
     var pinCard = document.getElementById('pin-change-card');
