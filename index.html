@@ -342,6 +342,7 @@
   <div class="card">
     <div class="card-title">📋 측정 기록</div>
     <div id="measureInputs" class="input-grid"></div>
+    <div style="margin:10px 0 4px;text-align:center;" id="liveTotalBadge"></div>
     <div style="margin-top:12px;">
       <div class="input-label">📝 메모</div>
       <textarea class="memo-area" id="memoInput" rows="2" placeholder="특이사항 입력..."></textarea>
@@ -629,73 +630,91 @@ function renderMeasure(){
   const rec = records[st.id] || {};
   let html = '';
 
+  // 실시간 등급 배지 헬퍼
+  const gradeBadge = (g) => {
+    if(g===null||g===undefined) return '';
+    const labels=['','1등급','2등급','3등급','4등급','5등급'];
+    const colors=['','#1565c0','#2e7d32','#e65100','#c62828','#880000'];
+    const bgs=['','#e3f2fd','#e8f5e9','#fff3e0','#ffebee','#fce4ec'];
+    return `<span style="margin-left:6px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${bgs[g]};color:${colors[g]};">${labels[g]}</span>`;
+  };
+  const scoreLabel = (s) => s!==null ? `<span style="font-size:10px;color:#888;">${s}점</span>` : '';
+
   if(selectedSubjects.includes('왕복오래달리기')){
-    html += `<div class="input-group">
-      <div class="input-label">🏃 왕복오래달리기</div>
+    const runScore = getScore(st.gender, curGrade, '왕복오래달리기', rec.왕복오래달리기);
+    const runGrade = runScore!==null ? scoreToGrade(runScore) : null;
+    html += `<div class="input-group" style="grid-column:1/-1;">
+      <div class="input-label" style="display:flex;align-items:center;gap:4px;">🏃 왕복오래달리기 ${scoreLabel(runScore)}${gradeBadge(runGrade)}<span id="badge_run"></span></div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_run" value="${rec.왕복오래달리기||''}" placeholder="횟수">
+        <input type="number" inputmode="decimal" id="i_run" value="${rec.왕복오래달리기||''}" placeholder="횟수" oninput="updateRunBadge(this.value,'${st.gender}','${curGrade}')">
         <span class="input-unit">회</span>
       </div>
     </div>`;
   }
   if(selectedSubjects.includes('유연성')){
+    const flexScore = getFlexScore(st.gender, curGrade, rec.유연성1, rec.유연성2);
+    const flexGrade = flexScore!==null ? scoreToGrade(flexScore) : null;
     html += `<div class="input-group">
       <div class="input-label">🤸 유연성 1차</div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_flex1" value="${rec.유연성1||''}" placeholder="cm">
+        <input type="number" inputmode="decimal" id="i_flex1" value="${rec.유연성1||''}" placeholder="cm" oninput="updateFlexBadge()">
         <span class="input-unit">cm</span>
       </div>
     </div>
     <div class="input-group">
-      <div class="input-label">🤸 유연성 2차</div>
+      <div class="input-label" style="display:flex;align-items:center;gap:4px;">🤸 유연성 2차 ${scoreLabel(flexScore)}${gradeBadge(flexGrade)}<span id="badge_flex"></span></div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_flex2" value="${rec.유연성2||''}" placeholder="cm">
+        <input type="number" inputmode="decimal" id="i_flex2" value="${rec.유연성2||''}" placeholder="cm" oninput="updateFlexBadge()">
         <span class="input-unit">cm</span>
       </div>
     </div>`;
   }
   if(selectedSubjects.includes('악력')){
+    const gripScore = getGripScore(st.gender, curGrade, rec.악력1u, rec.악력1l, rec.악력2u, rec.악력2l);
+    const gripGrade = gripScore!==null ? scoreToGrade(gripScore) : null;
     html += `<div class="input-group">
       <div class="input-label">💪 악력 1차 우</div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_grip1u" value="${rec.악력1u||''}" placeholder="kg">
+        <input type="number" inputmode="decimal" id="i_grip1u" value="${rec.악력1u||''}" placeholder="kg" oninput="updateGripBadge()">
         <span class="input-unit">kg</span>
       </div>
     </div>
     <div class="input-group">
       <div class="input-label">💪 악력 1차 좌</div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_grip1l" value="${rec.악력1l||''}" placeholder="kg">
+        <input type="number" inputmode="decimal" id="i_grip1l" value="${rec.악력1l||''}" placeholder="kg" oninput="updateGripBadge()">
         <span class="input-unit">kg</span>
       </div>
     </div>
     <div class="input-group">
       <div class="input-label">💪 악력 2차 우</div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_grip2u" value="${rec.악력2u||''}" placeholder="kg">
+        <input type="number" inputmode="decimal" id="i_grip2u" value="${rec.악력2u||''}" placeholder="kg" oninput="updateGripBadge()">
         <span class="input-unit">kg</span>
       </div>
     </div>
     <div class="input-group">
-      <div class="input-label">💪 악력 2차 좌</div>
+      <div class="input-label" style="display:flex;align-items:center;gap:4px;">💪 악력 2차 좌 ${scoreLabel(gripScore)}${gradeBadge(gripGrade)}<span id="badge_grip"></span></div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_grip2l" value="${rec.악력2l||''}" placeholder="kg">
+        <input type="number" inputmode="decimal" id="i_grip2l" value="${rec.악력2l||''}" placeholder="kg" oninput="updateGripBadge()">
         <span class="input-unit">kg</span>
       </div>
     </div>`;
   }
   if(selectedSubjects.includes('제자리멀리뛰기')){
+    const jumpScore = getJumpScore(st.gender, curGrade, rec.멀리뛰기1, rec.멀리뛰기2);
+    const jumpGrade = jumpScore!==null ? scoreToGrade(jumpScore) : null;
     html += `<div class="input-group">
       <div class="input-label">🦘 멀리뛰기 1차</div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_jump1" value="${rec.멀리뛰기1||''}" placeholder="cm">
+        <input type="number" inputmode="decimal" id="i_jump1" value="${rec.멀리뛰기1||''}" placeholder="cm" oninput="updateJumpBadge()">
         <span class="input-unit">cm</span>
       </div>
     </div>
     <div class="input-group">
-      <div class="input-label">🦘 멀리뛰기 2차</div>
+      <div class="input-label" style="display:flex;align-items:center;gap:4px;">🦘 멀리뛰기 2차 ${scoreLabel(jumpScore)}${gradeBadge(jumpGrade)}<span id="badge_jump"></span></div>
       <div class="input-field">
-        <input type="number" inputmode="decimal" id="i_jump2" value="${rec.멀리뛰기2||''}" placeholder="cm">
+        <input type="number" inputmode="decimal" id="i_jump2" value="${rec.멀리뛰기2||''}" placeholder="cm" oninput="updateJumpBadge()">
         <span class="input-unit">cm</span>
       </div>
     </div>`;
@@ -735,9 +754,72 @@ function renderMeasure(){
 
   document.getElementById('measureInputs').innerHTML = html;
   document.getElementById('memoInput').value = rec.memo || '';
+  // 기존 기록 있으면 즉시 총점 배지 표시
+  setTimeout(updateLiveTotal, 0);
 }
 
 function getVal(id){ const el=document.getElementById(id); return el ? el.value.trim() : ''; }
+
+/* ── 실시간 등급 배지 업데이트 ── */
+function _gradeBadgeHTML(g, s){
+  if(g===null||g===undefined||s===null) return '';
+  const labels=['','1등급','2등급','3등급','4등급','5등급'];
+  const colors=['','#1565c0','#2e7d32','#e65100','#c62828','#880000'];
+  const bgs=['','#e3f2fd','#e8f5e9','#fff3e0','#ffebee','#fce4ec'];
+  return `<span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${bgs[g]};color:${colors[g]};">${s}점 · ${labels[g]}</span>`;
+}
+function _curSt(){
+  const sts=students.filter(s=>String(s.grade)===curGrade&&String(s.cls)===curClass);
+  return sts[curIdx]||null;
+}
+function updateRunBadge(v){
+  const st=_curSt(); if(!st) return;
+  const s=getScore(st.gender,curGrade,'왕복오래달리기',v);
+  const el=document.getElementById('badge_run');
+  if(el) el.innerHTML = s!==null ? _gradeBadgeHTML(scoreToGrade(s),s) : '';
+  updateLiveTotal();
+}
+function updateFlexBadge(){
+  const st=_curSt(); if(!st) return;
+  const v1=getVal('i_flex1'), v2=getVal('i_flex2');
+  const s=getFlexScore(st.gender,curGrade,v1,v2);
+  const el=document.getElementById('badge_flex');
+  if(el) el.innerHTML = s!==null ? _gradeBadgeHTML(scoreToGrade(s),s) : '';
+  updateLiveTotal();
+}
+function updateGripBadge(){
+  const st=_curSt(); if(!st) return;
+  const s=getGripScore(st.gender,curGrade,getVal('i_grip1u'),getVal('i_grip1l'),getVal('i_grip2u'),getVal('i_grip2l'));
+  const el=document.getElementById('badge_grip');
+  if(el) el.innerHTML = s!==null ? _gradeBadgeHTML(scoreToGrade(s),s) : '';
+  updateLiveTotal();
+}
+function updateJumpBadge(){
+  const st=_curSt(); if(!st) return;
+  const s=getJumpScore(st.gender,curGrade,getVal('i_jump1'),getVal('i_jump2'));
+  const el=document.getElementById('badge_jump');
+  if(el) el.innerHTML = s!==null ? _gradeBadgeHTML(scoreToGrade(s),s) : '';
+  updateLiveTotal();
+}
+function updateLiveTotal(){
+  const st=_curSt(); if(!st) return;
+  const tmpRec={
+    grade:parseInt(curGrade), gender:st.gender,
+    왕복오래달리기: getVal('i_run'),
+    유연성1: getVal('i_flex1'), 유연성2: getVal('i_flex2'),
+    악력1u: getVal('i_grip1u'), 악력1l: getVal('i_grip1l'),
+    악력2u: getVal('i_grip2u'), 악력2l: getVal('i_grip2l'),
+    멀리뛰기1: getVal('i_jump1'), 멀리뛰기2: getVal('i_jump2'),
+  };
+  const {total, grade} = calcTotal(tmpRec);
+  const el=document.getElementById('liveTotalBadge');
+  if(!el) return;
+  if(total===null){ el.innerHTML=''; return; }
+  const labels=['','1등급','2등급','3등급','4등급','5등급'];
+  const colors=['','#1565c0','#2e7d32','#e65100','#c62828','#880000'];
+  const bgs=['','#e3f2fd','#e8f5e9','#fff3e0','#ffebee','#fce4ec'];
+  el.innerHTML=`<span style="background:${bgs[grade]};color:${colors[grade]};padding:4px 14px;border-radius:12px;font-weight:800;font-size:14px;">${total}점 · ${labels[grade]}</span>`;
+}
 
 function saveMeasure(){
   const sts = students.filter(s=>String(s.grade)===curGrade&&String(s.cls)===curClass);
